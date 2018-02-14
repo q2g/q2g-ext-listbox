@@ -7,7 +7,7 @@ import * as template from "text!./q2g-ext-listboxExtension.html";
 
 import { utils, logging, services, version } from "../node_modules/davinci.js/dist/umd/daVinci";
 
-import { RootExtension } from "../node_modules/davinci.js/src/utils/rootclasses";
+import { RootExtension } from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
 import { ListboxDirectiveFactory } from "./q2g-ext-listboxDirective";
 //#endregion
 

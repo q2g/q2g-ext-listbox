@@ -3,7 +3,7 @@ import { logging,
          utils,
          directives }           from "../node_modules/davinci.js/dist/umd/daVinci";
 import * as template            from "text!./q2g-ext-listboxDirective.html";
-import { RootSingleList, IQlikSingleListController } from "../node_modules/davinci.js/src/utils/rootclasses";
+import { RootSingleList, IQlikSingleListController } from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
 
 import { ListViewDirectiveFactory } from "../node_modules/davinci.js/src/directives/listview";
 //#endregion
