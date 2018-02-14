@@ -152,7 +152,7 @@ let parameter = {
                     items: {
                         orientation: {
                             type: "items",
-                            lable: "orientation",
+                            label: "orientation",
                             grouped: false,
                             items: {
                                 horizontalmode: {
@@ -169,11 +169,23 @@ let parameter = {
                                     }],
                                     defaultValue: false
                                 },
+                                fieldSize: {
+                                    ref: "properties.fieldSize",
+                                    label: "Field Size",
+                                    type: "number",
+                                    defaultValue: 80,
+                                    show: function (data: IDataProperties) {
+                                        if (!data.properties.horizontalmode) {
+                                            data.properties.fieldSize = 80;
+                                        }
+                                        return data.properties.horizontalmode;
+                                    }
+                                },
                             }
                         },
                         split: {
                             type: "items",
-                            lable: "orientation",
+                            label: "Orientation",
                             grouped: false,
                             items: {
                                 splitmode: {
@@ -197,14 +209,123 @@ let parameter = {
                                     defaultValue: "1",
                                     show: function (data: IDataProperties) {
                                         if (!data.properties.splitmode) {
-                                            data.properties.splitcolumns = "1";
+                                            data.properties.splitcolumns = 1;
+                                        }
+                                        return data.properties.splitmode;
+                                    }
+                                },
+                                splitorientation: {
+                                    ref: "properties.splitorientation",
+                                    label: "switch betweent the order",
+                                    component: "switch",
+                                    type: "boolean",
+                                    options: [{
+                                        value: true,
+                                        label: "horizontal"
+                                    }, {
+                                        value: false,
+                                        label: "vertical"
+                                    }],
+                                    defaultValue: false,
+                                    show: function (data: IDataProperties) {
+                                        if (!data.properties.splitmode) {
+                                            data.properties.splitorientation = false;
                                         }
                                         return data.properties.splitmode;
                                     }
                                 },
                             }
-                        }
+                        },
+                        sorting: {
+                            type: "items",
+                            label: "Sorting",
+                            grouped: false,
+                            items: {
+                                sortmode: {
+                                    ref: "properties.sortmode",
+                                    label: "Sorting",
+                                    component: "switch",
+                                    type: "boolean",
+                                    options: [{
+                                        value: true,
+                                        label: "individual"
+                                    }, {
+                                        value: false,
+                                        label: "automatic"
+                                    }],
+                                    defaultValue: false
+                                },
+                                byState: {
+                                    ref: "properties.byState",
+                                    label: "By State",
+                                    type: "boolean",
+                                    defaultValue: false,
+                                    show: function (data: IDataProperties) {
+                                        if (!data.properties.sortmode) {
+                                            data.properties.byState = false;
+                                        }
+                                        return data.properties.sortmode;
+                                    }
+                                },
+                                byFrequency: {
+                                    ref: "properties.byFrequency",
+                                    label: "By Frequency",
+                                    type: "boolean",
+                                    defaultValue: false,
+                                    show: function (data: IDataProperties) {
+                                        if (!data.properties.sortmode) {
+                                            data.properties.byFrequency = false;
+                                        }
+                                        return data.properties.sortmode;
+                                    }
+                                },
+                                byNumeric: {
+                                    ref: "properties.byNumeric",
+                                    label: "By Numeric",
+                                    type: "boolean",
+                                    defaultValue: false,
+                                    show: function (data: IDataProperties) {
+                                        if (!data.properties.sortmode) {
+                                            data.properties.byNumeric = false;
+                                        }
+                                        return data.properties.sortmode;
+                                    }
+                                },
+                                byAscii: {
+                                    ref: "properties.byAscii",
+                                    label: "By Ascii",
+                                    type: "boolean",
+                                    defaultValue: false,
+                                    show: function (data: IDataProperties) {
+                                        if (!data.properties.sortmode) {
+                                            data.properties.byAscii = false;
+                                        }
+                                        return data.properties.sortmode;
+                                    }
+                                },
+                                byLoadOrder: {
+                                    ref: "properties.byLoadOrder",
+                                    label: "By Load Order",
+                                    type: "boolean",
+                                    defaultValue: false,
+                                    show: function (data: IDataProperties) {
+                                        if (!data.properties.sortmode) {
+                                            data.properties.byLoadOrder = false;
+                                        }
+                                        return data.properties.sortmode;
+                                    }
+                                },
+                                byExpression: {
+                                    ref: "properties.byExpression",
+                                    label: "By Expression",
+                                    type: "string",
+                                    show: function (data: IDataProperties) {
+                                        return data.properties.sortmode;
+                                    }
+                                }
+                            }
                     }
+                }
                 }
             }
         }

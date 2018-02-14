@@ -13,6 +13,20 @@ interface ICreateDim {
     qGroupFieldDefs: Array<string>;
     qFallbackTitle: string;
 }
+
+export interface IProperties {
+    horizontalmode: boolean;
+    splitcolumns: number;
+    byState: boolean;
+    byFrequency: boolean;
+    byNumeric: boolean;
+    byAscii: boolean;
+    byLoadOrder: boolean;
+    byExpression: string;
+    fieldSize: number;
+    splitmode: boolean;
+    splitorientation: boolean;
+}
 //#endregion
 
 interface ITest {
@@ -27,17 +41,46 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
     list: utils.IQ2gListAdapter;
     listObject: EngineAPI.IGenericObject;
     lockMenuListValues: boolean = false;
-    headerInput: string = "";
     horizontalMode:boolean = false;
     itemHeight: number = 31;
     menuList: Array<utils.IMenuElement>;
     modalState: boolean = false;
+    properties: IProperties;
     selectedDimension: Array<string> = [];
-    showFocusedDimension:boolean = false;
+    showFocusedField:boolean = false;
     showHeaderButtons: boolean = false;
     showHeaderInput: boolean = false;
     statusText: string = "";
     title: string = "list box";
+    collectionAdapter: CollectionAdapter;
+    //#endregion
+
+    //#region headerInput
+    private _headerInput: string;
+    public get headerInput() : string {
+        return this._headerInput;
+    }
+    public set headerInput(v : string) {
+        if (v !== this.headerInput && typeof(this.list.obj) !== "undefined") {
+            try {
+                this.list.itemsPagingTop = 0;
+                this._headerInput = v;
+                this.list.obj.searchFor(!v? "": v)
+                    .then(() => {
+                        return this.listObject.getLayout();
+                    })
+                    .then((res: EngineAPI.IGenericObjectProperties) => {
+                        this.list.itemsCounter = res.qListObject.qDimensionInfo.qCardinal;
+                    })
+                .catch((e: Error) => {
+                    throw e;
+                });
+                return;
+            } catch (e) {
+                this.logger.error("error in setter of headerInput 3", e);
+            }
+        }
+    }
     //#endregion
 
     //#region logger
@@ -64,21 +107,19 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
             this._model = v;
             let that = this;
             v.on("changed", function() {
-
                 this.getLayout()
                     .then((res) => {
-                        if (typeof(res.qHyperCube.qDimensionInfo[0]) !== "undefined"
-                            && that.field !== res.qHyperCube.qDimensionInfo[0].qGroupFieldDefs[0]) {
+
+                        if (typeof(that.properties) === "undefined") {
+                            that.setProperties(res.properties);
+                        }
+                        if ((typeof(res.qHyperCube.qDimensionInfo[0]) !== "undefined"
+                                && that.field !== res.qHyperCube.qDimensionInfo[0].qGroupFieldDefs[0])
+                                || JSON.stringify(that.properties) !== JSON.stringify(res.properties)) {
+
+                            that.setProperties(res.properties);
                             that.createListObject(res);
                         }
-                    })
-                .catch((error) => {
-                    that.logger.error("error in changed - getLayout", error);
-                });
-
-                this.getProperties()
-                    .then((props) => {
-                        that.setProperties(props);
                     })
                 .catch((error) => {
                     that.logger.error("error in changed - getProperties", error);
@@ -89,27 +130,62 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
     }
     //#endregion
 
+    //#region itemsPageHeightTest
+    private _itemsPageHeightTest = 0;
+    public get itemsPageHeightTest() : number {
+        return this._itemsPageHeightTest;
+    }
+    public set itemsPageHeightTest(v : number) {
+        this._itemsPageHeightTest = v;
+
+        if (typeof(this.collectionAdapter) !== "undefined") {
+            this.collectionAdapter.itemsPagingHeight = v/(this.properties.splitcolumns?this.properties.splitcolumns:1);
+        }
+
+        if (typeof(this.list) !== "undefined") {
+            this.list.itemsPagingHeight = v;
+        }
+    }
+    //#endregion
 
     static $inject = ["$timeout", "$element", "$scope"];
 
     constructor(timeout: ng.ITimeoutService, element: JQuery, scope: ng.IScope) {
         super(timeout, element, scope);
         this.initMenuElements();
+
+
+        $(document).on("click", (e: JQueryEventObject) => {
+            try {
+                if (element.find(e.target).length === 0) {
+                    this.showFocusedField = false;
+                    this.showHeaderButtons = false;
+                    this.showHeaderInput = false;
+                    this.headerInput= "";
+                    this.timeout();
+                }
+            } catch (e) {
+                this.logger.error("Error in Constructor with click event", e);
+            }
+        });
     }
 
     //#region public functions
+
     /**
      * selects item from the list
      * @param pos position to be selected
      * @param assistItemsPagingTop top position of the page
      */
-    selectListObjectCallback(pos: number, event?: JQueryKeyEventObject) {
+    selectListObjectCallback(pos: number, event?: JQueryKeyEventObject, index?: number) {
         let assistItemsPagingTop = this.list.itemsPagingTop;
-        this.showFocusedDimension = true;
+        this.showFocusedField = true;
         this.showHeaderButtons = true;
 
+        let absPosition = pos + (this.collectionAdapter.itemsPagingHeight*index);
+
         if (this.modalState) {
-            this.selectItems(pos, assistItemsPagingTop)
+            this.selectItems(absPosition, assistItemsPagingTop)
             .catch((err: Error) => {
                 this.logger.error("ERROR in selectListObjectCallback", err);
             });
@@ -118,7 +194,7 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
         this.listObject.beginSelections(["/qListObjectDef"])
             .then(() => {
                 this.modalState = true;
-                return this.selectItems(pos, assistItemsPagingTop);
+                return this.selectItems(absPosition, assistItemsPagingTop);
             })
         .catch((err: Error) => {
             this.logger.error("ERROR in selectListObjectCallback", err);
@@ -129,7 +205,13 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
      * callback when enter on input field
      */
     extensionHeaderAccept() {
-        //
+        this.list.obj.acceptListObjectSearch(false)
+            .then(() => {
+                this.showHeaderInput = false;
+                this.headerInput = "";
+            }).catch((error) => {
+                this.logger.error("Error in setter of input Accept Dimension", error);
+            });
     }
 
     /**
@@ -178,9 +260,32 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
 
         }
     }
+
+    /**
+     * shortcuthandler to clears the made selection
+     * @param objectShortcut object wich gives you the shortcut name and the element, from which the shortcut come from
+     */
+    shortcutHandler(shortcutObject: directives.IShortcutObject, domcontainer: utils.IDomContainer) {
+        switch (shortcutObject.name) {
+            //#region escList
+            case "escList":
+                try {
+                    if (this.headerInput === "") {
+                        this.showHeaderInput = false;
+                    }
+                    return true;
+                } catch (e) {
+                    this.logger.error("Error in shortcutHandlerExtensionHeader", e);
+                    return false;
+                }
+            //#endregion
+        }
+    }
+
     //#endregion
 
     //#region private functions
+
     private createListObject(objectLayout: EngineAPI.IGenericHyperCubeLayout) {
 
             this.field = objectLayout.qHyperCube.qDimensionInfo[0].qGroupFieldDefs[0];
@@ -189,17 +294,17 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
             let qFieldLabels = objectLayout.qHyperCube.qDimensionInfo[0].qFallbackTitle;
 
 
-            if (this.listObject) {
-                this.model.app.destroySessionObject(this.listObject.id)
-                    .then(() => {
-                        this.createValueListSessionObjectAssist(qFieldLabels, qFieldDefs);
-                    })
-                    .catch((err: Error) => {
-                        this.logger.error("Error in createValueListSessionObjcet", err);
-                    });
-            } else {
+            // if (this.listObject) {
+            //     this.model.app.destroySessionObject(this.listObject.id)
+            //         .then(() => {
+            //             this.createValueListSessionObjectAssist(qFieldLabels, qFieldDefs);
+            //         })
+            //         .catch((err: Error) => {
+            //             this.logger.error("Error in createValueListSessionObjcet", err);
+            //         });
+            // } else {
                 this.createValueListSessionObjectAssist(qFieldLabels, qFieldDefs);
-            }
+            // }
     }
 
     /**
@@ -208,6 +313,7 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
      * @param dimensionFieldDefs definition of the diminsion the new session object should be create for
      */
     private createValueListSessionObjectAssist(dimensionName: string, dimensionFieldDefs: Array<string>): void {
+
         var parameter: EngineAPI.IGenericObjectProperties = {
             "qInfo": {
                 "qType": "ListObject"
@@ -223,12 +329,12 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                     "qFieldLabels": [dimensionName],
                     "qSortCriterias": [
                         {
-                            "qSortByState": 0,
-                            "qSortByFrequency": 0,
-                            "qSortByNumeric": 1,
-                            "qSortByAscii": 0,
-                            "qSortByLoadOrder": 0,
-                            "qSortByExpression": 0
+                            "qSortByState": this.properties.byState?1:0,
+                            "qSortByFrequency": this.properties.byFrequency?1:0,
+                            "qSortByNumeric": this.properties.byNumeric?1:0,
+                            "qSortByAscii": this.properties.byAscii?1:0,
+                            "qSortByLoadOrder": this.properties.byLoadOrder?1:0,
+                            "qSortByExpression": this.properties.byExpression?1:0
                         }
                         ]
                 },
@@ -254,6 +360,9 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                 this.listObject = genericObject;
 
                 genericObject.getLayout().then((res: EngineAPI.IGenericObjectProperties) => {
+
+                    this.collectionAdapter = new CollectionAdapter(this.properties.splitcolumns,this.properties.splitorientation?0:1);
+
                     this.list = new utils.Q2gListAdapter(
                         new utils.Q2gListObject(
                             this.listObject),
@@ -261,14 +370,24 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                         res.qListObject.qDimensionInfo.qCardinal,
                         "qlik"
                     );
+                    this.collectionAdapter.itemsPagingHeight = this.itemsPageHeightTest/
+                        (this.properties.splitcolumns?this.properties.splitcolumns:1);
+
+                    let that1 = this;
+                    this.list.obj.on("changeData", function () {
+                        that1.collectionAdapter.calcCollections(that.list.collection);
+                        that1.timeout();
+                    });
 
                     let that = this;
                     genericObject.on("changed", function () {
-                        that.list.obj.emit("changed", that.list.itemsPagingHeight);
-                        genericObject.getLayout().then((res: EngineAPI.IGenericObjectProperties) => {
+                        that.list.obj.emit("changed", that.itemsPageHeightTest);
 
-                            console.log("value", that.list);
-                            that.checkAvailabilityOfMenuListElements(res.qListObject.qDimensionInfo);
+                        that.checkAvailabilityOfMenuListElements(res.qListObject.qDimensionInfo);
+
+                        genericObject.getLayout()
+                        .then((res: EngineAPI.IGenericObjectProperties) => {
+
                             // that.checkIfDimIsLocked(res.qListObject.qDimensionInfo);
                         });
                     });
@@ -380,8 +499,6 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
         return new Promise((resolve, reject) => {
             this.listObject.selectListObjectValues("/qListObjectDef", (this.list.collection[pos].id as any), true)
                 .then(() => {
-                    console.log("pos", pos);
-                    console.log("this.list.itemsPagingTop", this.list.itemsPagingTop);
                     this.focusedPositionValues = pos + this.list.itemsPagingTop;
                     this.list.itemsPagingTop = assistItemsPagingTop;
                     this.statusText = "Dimension " + this.list.collection[pos].title + " gewählt";
@@ -419,24 +536,27 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
 
         this.menuList = JSON.parse(JSON.stringify(this.menuList));
     }
+
     //#endregion
 
 
 
 
 
-    setProperties(properties: any) {
-        this.changeOrientation(properties.properties.horizontalmode);
+    setProperties(properties: IProperties) {
+        this.properties = JSON.parse(JSON.stringify(properties));
+        if (!properties.splitmode) {
+            this.properties.splitcolumns = 1;
+        }
+        this.changeOrientation();
     }
 
-    changeOrientation(horizontalMode: boolean) {
-        if(horizontalMode) {
-            this.horizontalMode = false;
-            this.itemHeight = 30;
+    changeOrientation() {
+        if(this.properties.horizontalmode) {
+            this.itemHeight = this.properties.fieldSize;
             return;
         }
-        this.horizontalMode = true;
-        this.itemHeight = 80;
+        this.itemHeight = 30;
         return;
     }
 }
@@ -461,7 +581,84 @@ export function ListboxDirectiveFactory(rootNameSpace: string): ng.IDirectiveFac
                     directives.ListViewDirectiveFactory(rootNameSpace), "Listview");
                 utils.checkDirectiveIsRegistrated($injector, $registrationProvider, rootNameSpace,
                     directives.ExtensionHeaderDirectiveFactory(rootNameSpace), "ExtensionHeader");
+                utils.checkDirectiveIsRegistrated($injector, $registrationProvider, rootNameSpace,
+                    directives.ShortCutDirectiveFactory(rootNameSpace), "Shortcut");
             }
         };
     };
+}
+
+class CollectionAdapter {
+
+    collections: Array<Array<any>>;
+
+
+    private _itemsPagingHeight: number = 0;
+    public get itemsPagingHeight() : number {
+        return this._itemsPagingHeight;
+    }
+    public set itemsPagingHeight(v : number) {
+        this._itemsPagingHeight = v;
+    }
+
+    split: number;
+    splitmode: 0 | 1;
+
+
+
+    constructor(split: number, splitmode: 0 | 1) {
+        this.split = split;
+        this.splitmode = splitmode;
+    }
+
+    calcCollections (collection: any[]) {
+        let length = collection.length;
+        let countItem = 0;
+        let countCol = 0;
+        let collectionsAssist;
+
+        collectionsAssist = new Array(this.split);
+        for (let index = 0; index < this.split; index++) {
+            collectionsAssist[index] = [];
+        }
+
+        while (countItem < length) {
+
+
+            if (this.splitmode === 0) {
+                if (countCol%this.split === 0) {
+                    countCol = 0;
+                }
+                collectionsAssist[countCol].push(collection[countItem]);
+                countCol++;
+            }
+
+            if (this.splitmode === 1) {
+
+                if (countItem >= (this.itemsPagingHeight * (countCol+1))) {
+                    countCol++;
+                }
+
+                if (countCol >= this.split) {
+                    break;
+                }
+
+                try {
+
+                    collectionsAssist[countCol].push(collection[countItem]);
+                } catch (error) {
+                    console.error("error", error);
+                }
+            }
+
+            countItem++;
+        }
+
+        this.collections = collectionsAssist;
+
+        return collectionsAssist;
+    }
+
+
+
 }

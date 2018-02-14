@@ -17,7 +17,7 @@
 
                                   input-accept="vm.extensionHeaderAccept()"
                                   input-field="vm.headerInput"
-                                  input-bar-visible="showHeaderInput"
+                                  input-bar-visible="vm.showHeaderInput"
 
                                   menu-list="vm.menuList"
                                   menu-visible="vm.showHeaderButtons"
@@ -28,7 +28,7 @@
         </div>
     
     
-    </div class="list"
+    <div class="list"
           q2g-shortcut
           shortcut="[
             {name:'focusList', shortcut:vm.properties.shortcutFocusBookmarkList, rootscope: '|global|'},
@@ -41,19 +41,20 @@
         <q2g-listview ng-style="{'height': vm.elementHeight-42+'px'}"
                       tabindex="0"
 
-                      items="vm.list.collection"
+                      items="vm.collectionAdapter.collections"
                       items-count="vm.list.itemsCounter"
                       items-page-top="vm.list.itemsPagingTop"
-                      items-page-size="vm.list.itemsPagingHeight"
+                      items-page-size="vm.itemsPageHeightTest"
                       item-px-height="vm.itemHeight"
                       item-focused="vm.focusedPositionDimension"
 
-                      show-focused="vm.showFocusedDimension"
-                      horizontal-mode="vm.horizontalMode"
-                      callback-listview-objects="vm.selectListObjectCallback(pos)"
-                      theme="vm.theme">
+                      show-focused="vm.showFocusedField"
+                      horizontal-mode="vm.properties.horizontalmode"
+                      callback-listview-objects="vm.selectListObjectCallback(pos, event, index)"
+                      theme="vm.theme"
+                      split-mode="true">
         </q2g-listview>
-
+    </div></div>
 
     <q2g-identifier show="vm.isEditMode()">
     </q2g-identifier>
