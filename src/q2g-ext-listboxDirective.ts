@@ -314,6 +314,8 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
      */
     private createValueListSessionObjectAssist(dimensionName: string, dimensionFieldDefs: Array<string>): void {
 
+        this.title = dimensionName;
+
         var parameter: EngineAPI.IGenericObjectProperties = {
             "qInfo": {
                 "qType": "ListObject"
