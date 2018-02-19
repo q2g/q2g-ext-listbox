@@ -3,7 +3,7 @@ import { logging,
          utils,
          directives }           from "../node_modules/davinci.js/dist/umd/daVinci";
 import * as template            from "text!./q2g-ext-listboxDirective.html";
-import { RootSingleList, IQlikSingleListController } from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
+import { RootSingleList} from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
 
 import { ListViewDirectiveFactory } from "../node_modules/davinci.js/src/directives/listview";
 //#endregion
@@ -38,6 +38,12 @@ export interface IProperties {
 
 interface ITest {
     test: void;
+}
+
+interface IQlikSingleListController {
+    model: EngineAPI.IGenericObject;
+    selectListObjectCallback(pos: number, event?: JQueryKeyEventObject): void;
+    extensionHeaderAccept(): void;
 }
 
 class ListboxController extends RootSingleList implements ng.IController, IQlikSingleListController {
@@ -187,8 +193,16 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
         let assistItemsPagingTop = this.list.itemsPagingTop;
         this.showFocusedField = true;
         this.showHeaderButtons = true;
+        let absPosition = 0;
 
-        let absPosition = pos + (this.collectionAdapter.itemsPagingHeight*index);
+        console.log("### selectItem ###", pos, index, this.collectionAdapter.itemsPagingHeight);
+        if (this.properties.splitorientation) {
+            absPosition = index + (this.collectionAdapter.itemsPagingHeight*pos);
+        } else {
+            absPosition = pos + (this.collectionAdapter.itemsPagingHeight*index);
+        }
+
+        console.log("### selectItem absPosition###", absPosition);
 
         if (this.modalState) {
             this.selectItems(absPosition, assistItemsPagingTop)
@@ -526,10 +540,6 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
     }
 
     //#endregion
-
-
-
-
 
     setProperties(properties: IProperties) {
         this.properties = JSON.parse(JSON.stringify(properties));

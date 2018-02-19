@@ -7,7 +7,6 @@ import * as template from "text!./q2g-ext-listboxExtension.html";
 
 import { utils, logging, services, version } from "../node_modules/davinci.js/dist/umd/daVinci";
 
-import { RootExtension } from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
 import { ListboxDirectiveFactory } from "./q2g-ext-listboxDirective";
 //#endregion
 
@@ -377,6 +376,33 @@ let parameter = {
     }
 };
 //#endregion
+
+class RootExtension {
+
+    model: EngineAPI.IGenericObject;
+    qlik: RootAPI.IRoot;
+
+    constructor(model:EngineAPI.IGenericObject, qlik: RootAPI.IRoot) {
+        this.model = model;
+        this.qlik = qlik;
+    }
+
+    /**
+     * isEditMode
+     * checks if extension is in edit mode or in anylyse mode
+     */
+    public isEditMode() {
+        try {
+            if (this.qlik.navigation.getMode() === "analysis") {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (error) {
+            console.error("Error in function isEditMode", error);
+        }
+    }
+}
 
 class ListExtension extends RootExtension {
 
