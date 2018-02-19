@@ -197,8 +197,10 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
 
         console.log("### selectItem ###", pos, index, this.collectionAdapter.itemsPagingHeight);
         if (this.properties.splitorientation) {
+            console.log("test 1");
             absPosition = index + (this.collectionAdapter.itemsPagingHeight*pos);
         } else {
+            console.log("test 2");
             absPosition = pos + (this.collectionAdapter.itemsPagingHeight*index);
         }
 
