@@ -5,7 +5,7 @@ import { logging,
 import * as template            from "text!./q2g-ext-listboxDirective.html";
 import { RootSingleList} from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
 
-import { ListViewDirectiveFactory } from "../node_modules/davinci.js/src/directives/listview";
+import { ListViewDirectiveFactory } from "../node_modules/davinci.js/dist/umd/directives/listview";
 //#endregion
 
 //#region
@@ -142,7 +142,7 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
     }
     //#endregion
 
-    //#region itemsPageHeightTest
+    //#region itemsPageSize
     private _itemsPageSize = 0;
     public get itemsPageSize() : number {
         return this._itemsPageSize;
