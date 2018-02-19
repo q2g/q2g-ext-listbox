@@ -22,7 +22,14 @@ export interface IProperties {
     byNumeric: boolean;
     byAscii: boolean;
     byLoadOrder: boolean;
-    byExpression: string;
+    byExpression: boolean;
+    byStateOrder: string;
+    byFrequencyOrder: string;
+    byNumericOrder: string;
+    byAsciiOrder: string;
+    byLoadOrderOrder: string;
+    byExpressionOrder: string;
+    byExpressionFcn: string;
     fieldSize: number;
     splitmode: boolean;
     splitorientation: boolean;
@@ -116,7 +123,6 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                         if ((typeof(res.qHyperCube.qDimensionInfo[0]) !== "undefined"
                                 && that.field !== res.qHyperCube.qDimensionInfo[0].qGroupFieldDefs[0])
                                 || JSON.stringify(that.properties) !== JSON.stringify(res.properties)) {
-
                             that.setProperties(res.properties);
                             that.createListObject(res);
                         }
@@ -131,12 +137,12 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
     //#endregion
 
     //#region itemsPageHeightTest
-    private _itemsPageHeightTest = 0;
-    public get itemsPageHeightTest() : number {
-        return this._itemsPageHeightTest;
+    private _itemsPageSize = 0;
+    public get itemsPageSize() : number {
+        return this._itemsPageSize;
     }
-    public set itemsPageHeightTest(v : number) {
-        this._itemsPageHeightTest = v;
+    public set itemsPageSize(v : number) {
+        this._itemsPageSize = v;
 
         if (typeof(this.collectionAdapter) !== "undefined") {
             this.collectionAdapter.itemsPagingHeight = v/(this.properties.splitcolumns?this.properties.splitcolumns:1);
@@ -250,14 +256,6 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
             case "Clear all selections":
                 this.model.app.clearAll(true);
                 break;
-            case "Lock dimension":
-                this.lockMenuListValues = true;
-                (this.listObject.lock as any)("/qListObjectDef");
-                break;
-            case "Scramble Values":
-                (this.model.app as any).scramble(this.selectedDimension);
-                break;
-
         }
     }
 
@@ -307,6 +305,11 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
             // }
     }
 
+    private setSortOrderByProperty(sort: boolean, direction: string): 1 | 0 | -1 {
+
+        return sort?(direction==="a"?1:-1):0;
+    }
+
     /**
      * creates the session object for the selected dimension by dimension name assist
      * @param dimensionName name of the diminsion the new session object should be create for
@@ -331,12 +334,14 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                     "qFieldLabels": [dimensionName],
                     "qSortCriterias": [
                         {
-                            "qSortByState": this.properties.byState?1:0,
-                            "qSortByFrequency": this.properties.byFrequency?1:0,
-                            "qSortByNumeric": this.properties.byNumeric?1:0,
-                            "qSortByAscii": this.properties.byAscii?1:0,
-                            "qSortByLoadOrder": this.properties.byLoadOrder?1:0,
-                            "qSortByExpression": this.properties.byExpression?1:0
+                            "qSortByState": this.setSortOrderByProperty(this.properties.byState, this.properties.byStateOrder),
+                            "qSortByFrequency": this.setSortOrderByProperty(this.properties.byFrequency, this.properties.byFrequencyOrder),
+                            "qSortByNumeric": this.setSortOrderByProperty(this.properties.byNumeric, this.properties.byNumericOrder),
+                            "qSortByAscii": this.setSortOrderByProperty(this.properties.byAscii, this.properties.byAsciiOrder),
+                            "qSortByLoadOrder": this.setSortOrderByProperty(this.properties.byLoadOrder, this.properties.byLoadOrderOrder),
+                            "qSortByExpression": this.setSortOrderByProperty(this.properties.byExpression,
+                                this.properties.byExpressionOrder),
+                            "qExpression": this.properties.byExpression?this.properties.byExpressionFcn:""
                         }
                         ]
                 },
@@ -372,7 +377,7 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                         res.qListObject.qDimensionInfo.qCardinal,
                         "qlik"
                     );
-                    this.collectionAdapter.itemsPagingHeight = this.itemsPageHeightTest/
+                    this.collectionAdapter.itemsPagingHeight = this.itemsPageSize/
                         (this.properties.splitcolumns?this.properties.splitcolumns:1);
 
                     let that1 = this;
@@ -383,7 +388,7 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
 
                     let that = this;
                     genericObject.on("changed", function () {
-                        that.list.obj.emit("changed", that.itemsPageHeightTest);
+                        that.list.obj.emit("changed", that.itemsPageSize);
 
                         that.checkAvailabilityOfMenuListElements(res.qListObject.qDimensionInfo);
 
@@ -471,25 +476,6 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
             hasSeparator: false,
             type: "menu"
         });
-        this.menuList.push({
-            buttonType: "",
-            isVisible: true,
-            isEnabled: false,
-            icon: "unlock",
-            name: "Lock dimension",
-            hasSeparator: false,
-            type: "menu"
-        });
-        this.menuList.push({
-            buttonType: "",
-            isVisible: true,
-            isEnabled: false,
-            icon: "debug",
-            name: "Scramble Values",
-            hasSeparator: false,
-            type: "menu"
-        });
-
     }
 
     /**

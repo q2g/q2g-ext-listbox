@@ -43,108 +43,242 @@ let parameter = {
             min: 1,
             max: 1
         },
+        sorting: {
+            component: "items",
+            label: "Sorting",
+            grouped: true,
+            items: {
+                sortmode: {
+                    ref: "properties.sortmode",
+                    label: "Sorting",
+                    component: "switch",
+                    type: "boolean",
+                    options: [{
+                        value: false,
+                        label: "individual"
+                    }, {
+                        value: true,
+                        label: "automatic"
+                    }],
+                    defaultValue: true
+                },
+                byState: {
+                    component: "items",
+                    grouped: false,
+                    items: {
+                        byState: {
+                            ref: "properties.byState",
+                            label: "sort by State",
+                            type: "boolean",
+                            defaultValue: false
+                        },
+                        byStateOrder: {
+                            ref: "properties.byStateOrder",
+                            component: "dropdown",
+                            type: "string",
+                            options: [{
+                                value: "a",
+                                label: "ascending"
+                            }, {
+                                value: "d",
+                                label: "descending"
+                            }],
+                            defaultValue: "a",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byState;
+                            }
+                        }
+                    },
+                    show: function (data: IDataProperties) {
+                        if (data.properties.sortmode) {
+                            data.properties.byState = false;
+                        }
+                        return !data.properties.sortmode;
+                    }
+                },
+                byFrequency: {
+                    component: "items",
+                    grouped: false,
+                    items: {
+                        byState: {
+                            ref: "properties.byFrequency",
+                            label: "sort by Frequency",
+                            type: "boolean",
+                            defaultValue: false
+                        },
+                        byFrequencyOrder: {
+                            ref: "properties.byFrequencyOrder",
+                            component: "dropdown",
+                            type: "string",
+                            options: [{
+                                value: "a",
+                                label: "ascending"
+                            }, {
+                                value: "d",
+                                label: "descending"
+                            }],
+                            defaultValue: "a",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byFrequency;
+                            }
+                        }
+                    },
+                    show: function (data: IDataProperties) {
+                        if (data.properties.sortmode) {
+                            data.properties.byFrequency = false;
+                        }
+                        return !data.properties.sortmode;
+                    }
+                },
+                byNumeric: {
+                    component: "items",
+                    grouped: false,
+                    items: {
+                        byNumeric: {
+                            ref: "properties.byNumeric",
+                            label: "sort by Numeric",
+                            type: "boolean",
+                            defaultValue: false
+                        },
+                        byNumericOrder: {
+                            ref: "properties.byNumericOrder",
+                            component: "dropdown",
+                            type: "string",
+                            options: [{
+                                value: "a",
+                                label: "ascending"
+                            }, {
+                                value: "d",
+                                label: "descending"
+                            }],
+                            defaultValue: "a",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byNumeric;
+                            }
+                        }
+                    },
+                    show: function (data: IDataProperties) {
+                        if (data.properties.sortmode) {
+                            data.properties.byNumeric = false;
+                        }
+                        return !data.properties.sortmode;
+                    }
+                },
+                byAscii: {
+                    component: "items",
+                    grouped: false,
+                    items: {
+                        byAscii: {
+                            ref: "properties.byAscii",
+                            label: "sort by Ascii",
+                            type: "boolean",
+                            defaultValue: false
+                        },
+                        byAsciiOrder: {
+                            ref: "properties.byAsciiOrder",
+                            component: "dropdown",
+                            type: "string",
+                            options: [{
+                                value: "a",
+                                label: "ascending"
+                            }, {
+                                value: "d",
+                                label: "descending"
+                            }],
+                            defaultValue: "a",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byAscii;
+                            }
+                        }
+                    },
+                    show: function (data: IDataProperties) {
+                        if (data.properties.sortmode) {
+                            data.properties.byAscii = false;
+                        }
+                        return !data.properties.sortmode;
+                    }
+                },
+                byLoadOrder: {
+                    component: "items",
+                    grouped: false,
+                    items: {
+                        byLoadOrder: {
+                            ref: "properties.byLoadOrder",
+                            label: "sort by Load Order",
+                            type: "boolean",
+                            defaultValue: false
+                        },
+                        byLoadOrderOrder: {
+                            ref: "properties.byLoadOrderOrder",
+                            component: "dropdown",
+                            type: "string",
+                            options: [{
+                                value: "a",
+                                label: "ascending"
+                            }, {
+                                value: "d",
+                                label: "descending"
+                            }],
+                            defaultValue: "a",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byLoadOrder;
+                            }
+                        }
+                    },
+                    show: function (data: IDataProperties) {
+                        if (data.properties.sortmode) {
+                            data.properties.byLoadOrder = false;
+                        }
+                        return !data.properties.sortmode;
+                    }
+                },
+                byExpression: {
+                    component: "items",
+                    grouped: false,
+                    items: {
+                        byExpression: {
+                            ref: "properties.byExpression",
+                            label: "sort by Expression",
+                            type: "boolean",
+                            defaultValue: false
+                        },
+                        byExpressionFcn: {
+                            ref: "properties.byExpressionFcn",
+                            type: "string",
+                            expression: "optional",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byExpression;
+                            }
+                        },
+                        byExpressionOrder: {
+                            ref: "properties.byExpressionOrder",
+                            component: "dropdown",
+                            type: "string",
+                            options: [{
+                                value: "a",
+                                label: "ascending"
+                            }, {
+                                value: "d",
+                                label: "descending"
+                            }],
+                            defaultValue: "a",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byExpression;
+                            }
+                        }
+                    },
+                    show: function (data: IDataProperties) {
+                        if (data.properties.sortmode) {
+                            data.properties.byExpression = false;
+                        }
+                        return !data.properties.sortmode;
+                    }
+                }
+            }
+        },
         settings: {
             uses: "settings",
             items: {
-                accessibility: {
-                    type: "items",
-                    label: "Accessibility",
-                    grouped: true,
-                    items: {
-                        shortcuts: {
-                            type: "items",
-                            lable: "shortcuts",
-                            grouped: false,
-                            items: {
-                                ShortcutLable: {
-                                    label: "In the following, you can change the used shortcuts",
-                                    component: "text"
-                                },
-                                shortcutUseDefaults: {
-                                    ref: "properties.shortcutUseDefaults",
-                                    label: "use default shortcuts",
-                                    component: "switch",
-                                    type: "boolean",
-                                    options: [{
-                                        value: true,
-                                        label: "use"
-                                    }, {
-                                        value: false,
-                                        label: "not use"
-                                    }],
-                                    defaultValue: true
-                                },
-                                shortcutFocusList: {
-                                    ref: "properties.shortcutFocusList",
-                                    label: "focus list",
-                                    type: "string",
-                                    defaultValue: "strg + alt + 70",
-                                    show: function (data: any) {
-                                        if (data.properties.shortcutUseDefaults) {
-                                            data.properties.shortcutFocusList = "strg + alt + 70";
-                                        }
-                                        return !data.properties.shortcutUseDefaults;
-                                    }
-                                },
-                                shortcutFocusSearchField: {
-                                    ref: "properties.shortcutFocusSearchField",
-                                    label: "focus search field",
-                                    type: "string",
-                                    defaultValue: "strg + alt + 83",
-                                    show: function (data: any) {
-                                        if (data.properties.shortcutUseDefaults) {
-                                            data.properties.shortcutFocusSearchField = "strg + alt + 83";
-                                        }
-                                        return !data.properties.shortcutUseDefaults;
-                                    }
-                                }
-                            }
-                        },
-                        arialive: {
-                            type: "items",
-                            lable: "arialive",
-                            grouped: false,
-                            items: {
-                                configLable: {
-                                    label: "In the following, you can change Settings",
-                                    component: "text"
-                                },
-                                useAccessibility: {
-                                    ref: "properties.aria.useAccessibility",
-                                    label: "use accessibility",
-                                    component: "switch",
-                                    type: "boolean",
-                                    options: [{
-                                        value: true,
-                                        label: "use"
-                                    }, {
-                                        value: false,
-                                        label: "not use"
-                                    }],
-                                    defaultValue: false
-                                },
-                                timeAria: {
-                                    ref: "properties.aria.timeAria",
-                                    label: "Timeinterval for hints",
-                                    type: "string",
-                                    defaultValue: "7000",
-                                    show: function (data: any) {
-                                        return data.properties.useAccessibility;
-                                    }
-                                },
-                                actionDelay: {
-                                    ref: "properties.aria.actionDelay",
-                                    label: "Delay bevor action (used for Aria Live Regions)",
-                                    type: "string",
-                                    defaultValue: "100",
-                                    show: function (data: any) {
-                                        return data.properties.useAccessibility;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
                 configuration: {
                     type: "items",
                     label: "Configuration",
@@ -235,97 +369,8 @@ let parameter = {
                                     }
                                 },
                             }
-                        },
-                        sorting: {
-                            type: "items",
-                            label: "Sorting",
-                            grouped: false,
-                            items: {
-                                sortmode: {
-                                    ref: "properties.sortmode",
-                                    label: "Sorting",
-                                    component: "switch",
-                                    type: "boolean",
-                                    options: [{
-                                        value: true,
-                                        label: "individual"
-                                    }, {
-                                        value: false,
-                                        label: "automatic"
-                                    }],
-                                    defaultValue: false
-                                },
-                                byState: {
-                                    ref: "properties.byState",
-                                    label: "By State",
-                                    type: "boolean",
-                                    defaultValue: false,
-                                    show: function (data: IDataProperties) {
-                                        if (!data.properties.sortmode) {
-                                            data.properties.byState = false;
-                                        }
-                                        return data.properties.sortmode;
-                                    }
-                                },
-                                byFrequency: {
-                                    ref: "properties.byFrequency",
-                                    label: "By Frequency",
-                                    type: "boolean",
-                                    defaultValue: false,
-                                    show: function (data: IDataProperties) {
-                                        if (!data.properties.sortmode) {
-                                            data.properties.byFrequency = false;
-                                        }
-                                        return data.properties.sortmode;
-                                    }
-                                },
-                                byNumeric: {
-                                    ref: "properties.byNumeric",
-                                    label: "By Numeric",
-                                    type: "boolean",
-                                    defaultValue: false,
-                                    show: function (data: IDataProperties) {
-                                        if (!data.properties.sortmode) {
-                                            data.properties.byNumeric = false;
-                                        }
-                                        return data.properties.sortmode;
-                                    }
-                                },
-                                byAscii: {
-                                    ref: "properties.byAscii",
-                                    label: "By Ascii",
-                                    type: "boolean",
-                                    defaultValue: false,
-                                    show: function (data: IDataProperties) {
-                                        if (!data.properties.sortmode) {
-                                            data.properties.byAscii = false;
-                                        }
-                                        return data.properties.sortmode;
-                                    }
-                                },
-                                byLoadOrder: {
-                                    ref: "properties.byLoadOrder",
-                                    label: "By Load Order",
-                                    type: "boolean",
-                                    defaultValue: false,
-                                    show: function (data: IDataProperties) {
-                                        if (!data.properties.sortmode) {
-                                            data.properties.byLoadOrder = false;
-                                        }
-                                        return data.properties.sortmode;
-                                    }
-                                },
-                                byExpression: {
-                                    ref: "properties.byExpression",
-                                    label: "By Expression",
-                                    type: "string",
-                                    show: function (data: IDataProperties) {
-                                        return data.properties.sortmode;
-                                    }
-                                }
-                            }
+                        }
                     }
-                }
                 }
             }
         }

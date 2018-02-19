@@ -7,7 +7,8 @@
     <div q2g-shortcut-scope
          q2g-shortcut
          shortcut="[{name:'escList', shortcut:'27'}]"
-         shortcut-action="vm.shortcutHandler(shortcutObject, domcontainer)">
+         shortcut-action="vm.shortcutHandler(shortcutObject, domcontainer)"
+         style="width:100%">
     
         <div>
             <q2g-extension-header max-number-of-elements="5"
@@ -44,7 +45,7 @@
                       items="vm.collectionAdapter.collections"
                       items-count="vm.list.itemsCounter"
                       items-page-top="vm.list.itemsPagingTop"
-                      items-page-size="vm.itemsPageHeightTest"
+                      items-page-size="vm.itemsPageSize"
                       item-px-height="vm.itemHeight"
                       item-focused="vm.focusedPositionDimension"
 
