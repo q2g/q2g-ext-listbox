@@ -3,7 +3,7 @@
 [![TravisCI](https://travis-ci.org/q2g/q2g-ext-listbox.svg?branch=master)](https://travis-ci.org/q2g/q2g-ext-listboxe)
 [![Downloads](https://m.sense2go.net/downloads.svg?q2g-ext-listbox)](https://m.sense2go.net/extension-package)
 
-TBD
+Qlik Sense Styled listbox with extra features like Split / Horizontal Mode,...
 
 ## Intro
 
