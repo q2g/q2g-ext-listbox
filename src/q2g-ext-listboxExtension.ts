@@ -1,13 +1,15 @@
 //#region Imports
 import "css!./q2g-ext-listboxExtension.css";
+import * as qvangular                   from "qvangular";
+import * as qlik                        from "qlik";
+import * as template                    from "text!./q2g-ext-listboxExtension.html";
+import { utils,
+         logging,
+         services,
+         version }                      from "../node_modules/davinci.js/dist/umd/daVinci";
 
-import * as qvangular from "qvangular";
-import * as qlik from "qlik";
-import * as template from "text!./q2g-ext-listboxExtension.html";
-
-import { utils, logging, services, version } from "../node_modules/davinci.js/dist/umd/daVinci";
-
-import { ListboxDirectiveFactory } from "./q2g-ext-listboxDirective";
+import { ListboxDirectiveFactory, 
+         IProperties}                   from "./q2g-ext-listboxDirective";
 //#endregion
 
 //#region registrate services
@@ -28,7 +30,7 @@ utils.checkDirectiveIsRegistrated($injector, qvangular, "", ListboxDirectiveFact
 
 //#region interfaces
 interface IDataProperties {
-    properties: any;
+    properties: IProperties;
 }
 //#endregion
 
@@ -344,6 +346,7 @@ let parameter = {
                                         if (!data.properties.splitmode) {
                                             data.properties.splitcolumns = 1;
                                         }
+                                        data.properties.splitcolumns = Math.round(data.properties.splitcolumns);
                                         return data.properties.splitmode;
                                     }
                                 },

@@ -1,18 +1,13 @@
-//#region
+//#region Imports
 import { logging,
          utils,
-         directives }           from "../node_modules/davinci.js/dist/umd/daVinci";
-import * as template            from "text!./q2g-ext-listboxDirective.html";
-import { RootSingleList} from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
-
+         directives }               from "../node_modules/davinci.js/dist/umd/daVinci";
+import { RootSingleList}            from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
 import { ListViewDirectiveFactory } from "../node_modules/davinci.js/dist/umd/directives/listview";
+import * as template                from "text!./q2g-ext-listboxDirective.html";
 //#endregion
 
-//#region
-interface ICreateDim {
-    qGroupFieldDefs: Array<string>;
-    qFallbackTitle: string;
-}
+//#region Interfaces
 
 export interface IProperties {
     horizontalmode: boolean;
@@ -33,11 +28,7 @@ export interface IProperties {
     fieldSize: number;
     splitmode: boolean;
     splitorientation: boolean;
-}
-//#endregion
-
-interface ITest {
-    test: void;
+    sortmode: boolean;
 }
 
 interface IQlikSingleListController {
@@ -45,6 +36,8 @@ interface IQlikSingleListController {
     selectListObjectCallback(pos: number, event?: JQueryKeyEventObject): void;
     extensionHeaderAccept(): void;
 }
+
+//#endregion
 
 class ListboxController extends RootSingleList implements ng.IController, IQlikSingleListController {
 
@@ -151,7 +144,11 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
         this._itemsPageSize = v;
 
         if (typeof(this.collectionAdapter) !== "undefined") {
-            this.collectionAdapter.itemsPagingHeight = v/(this.properties.splitcolumns?this.properties.splitcolumns:1);
+            try {
+                this.collectionAdapter.itemsPagingHeight = v/(this.properties.splitcolumns?this.properties.splitcolumns:1);
+            } catch (error) {
+                this.logger.error("ERRORin setter of itemsPageSize", error);
+            }
         }
 
         if (typeof(this.list) !== "undefined") {
@@ -194,15 +191,12 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
         this.showFocusedField = true;
         this.showHeaderButtons = true;
         let absPosition = 0;
-
-        console.log("### selectItem ###", pos, index, this.collectionAdapter.itemsPagingHeight);
+        
         if (this.properties.splitorientation) {
-            absPosition = index + (this.collectionAdapter.itemsPagingHeight*pos);
+            absPosition = index + (this.properties.splitcolumns * pos);
         } else {
-            absPosition = pos + (this.collectionAdapter.itemsPagingHeight*index);
+            absPosition = pos + (this.collectionAdapter.itemsPagingHeight * index);
         }
-
-        console.log("### selectItem absPosition###", absPosition);
 
         if (this.modalState) {
             this.selectItems(absPosition, assistItemsPagingTop)
@@ -244,31 +238,55 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                 this.showHeaderButtons = false;
                 this.showHeaderInput = false;
                 this.modalState = false;
-                this.listObject.endSelections(true);
+                this.listObject.endSelections(true)
+                    .catch((error) => {
+                        this.logger.error("ERROR in menuListActionCallback", error)
+                    });
                 break;
             case "Cancle Selection":
                 this.showHeaderButtons = false;
                 this.showHeaderInput = false;
                 this.modalState = false;
-                this.listObject.endSelections(false);
+                this.listObject.endSelections(false)
+                .catch((error) => {
+                    this.logger.error("ERROR in menuListActionCallback", error)
+                });
                 break;
             case "clear":
-                this.listObject.clearSelections("/qListObjectDef");
+                this.listObject.clearSelections("/qListObjectDef")
+                .catch((error) => {
+                    this.logger.error("ERROR in menuListActionCallback", error)
+                });
                 break;
             case "Select all":
-                this.listObject.selectListObjectAll("/qListObjectDef");
+                this.listObject.selectListObjectAll("/qListObjectDef")
+                .catch((error) => {
+                    this.logger.error("ERROR in menuListActionCallback", error)
+                });
                 break;
             case "Select possible":
-                this.listObject.selectListObjectPossible("/qListObjectDef");
+                this.listObject.selectListObjectPossible("/qListObjectDef")
+                .catch((error) => {
+                    this.logger.error("ERROR in menuListActionCallback", error)
+                });
                 break;
             case "Select alternative":
-                this.listObject.selectListObjectAlternative("/qListObjectDef");
+                this.listObject.selectListObjectAlternative("/qListObjectDef")
+                .catch((error) => {
+                    this.logger.error("ERROR in menuListActionCallback", error)
+                });
                 break;
             case "Select excluded":
-                this.listObject.selectListObjectExcluded("/qListObjectDef");
+                this.listObject.selectListObjectExcluded("/qListObjectDef")
+                .catch((error) => {
+                    this.logger.error("ERROR in menuListActionCallback", error)
+                });
                 break;
             case "Clear all selections":
-                this.model.app.clearAll(true);
+                this.model.app.clearAll(true)
+                .catch((error) => {
+                    this.logger.error("ERROR in menuListActionCallback", error)
+                });
                 break;
         }
     }
@@ -305,18 +323,7 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
             let qFieldDefs = objectLayout.qHyperCube.qDimensionInfo[0].qGroupFieldDefs;
             let qFieldLabels = objectLayout.qHyperCube.qDimensionInfo[0].qFallbackTitle;
 
-
-            // if (this.listObject) {
-            //     this.model.app.destroySessionObject(this.listObject.id)
-            //         .then(() => {
-            //             this.createValueListSessionObjectAssist(qFieldLabels, qFieldDefs);
-            //         })
-            //         .catch((err: Error) => {
-            //             this.logger.error("Error in createValueListSessionObjcet", err);
-            //         });
-            // } else {
-                this.createValueListSessionObjectAssist(qFieldLabels, qFieldDefs);
-            // }
+            this.createValueListSessionObjectAssist(qFieldLabels, qFieldDefs);
     }
 
     private setSortOrderByProperty(sort: boolean, direction: string): 1 | 0 | -1 {
@@ -391,8 +398,12 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                         res.qListObject.qDimensionInfo.qCardinal,
                         "qlik"
                     );
-                    this.collectionAdapter.itemsPagingHeight = this.itemsPageSize/
+                    try {
+                        this.collectionAdapter.itemsPagingHeight = this.itemsPageSize/
                         (this.properties.splitcolumns?this.properties.splitcolumns:1);
+                    } catch (error) {
+                        this.logger.error("ERROR in createValueListSessionObjectAssist", error);
+                    }
 
                     let that1 = this;
                     this.list.obj.on("changeData", function () {
@@ -407,10 +418,9 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
                         that.checkAvailabilityOfMenuListElements(res.qListObject.qDimensionInfo);
 
                         genericObject.getLayout()
-                        .then((res: EngineAPI.IGenericObjectProperties) => {
-
-                            // that.checkIfDimIsLocked(res.qListObject.qDimensionInfo);
-                        });
+                        .catch((error) => {
+                            this.logger.error("ERROR in createValueListSessionObjectAssist", error);
+                        })
                     });
                     genericObject.emit("changed");
 
@@ -539,9 +549,11 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
         this.menuList = JSON.parse(JSON.stringify(this.menuList));
     }
 
-    //#endregion
-
-    setProperties(properties: IProperties) {
+    /**
+     * sets the properties, and maks adjustments according to the properties
+     * @param properties properties from the engine model
+     */
+    private setProperties(properties: IProperties) {
         this.properties = JSON.parse(JSON.stringify(properties));
         if (!properties.splitmode) {
             this.properties.splitcolumns = 1;
@@ -549,7 +561,10 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
         this.changeOrientation();
     }
 
-    changeOrientation() {
+    /**
+     * sets default values for the orientation
+     */
+    private changeOrientation() {
         if(this.properties.horizontalmode) {
             this.itemHeight = this.properties.fieldSize;
             return;
@@ -557,6 +572,9 @@ class ListboxController extends RootSingleList implements ng.IController, IQlikS
         this.itemHeight = 30;
         return;
     }
+
+    //#endregion
+
 }
 
 export function ListboxDirectiveFactory(rootNameSpace: string): ng.IDirectiveFactory {
@@ -586,7 +604,7 @@ export function ListboxDirectiveFactory(rootNameSpace: string): ng.IDirectiveFac
     };
 }
 
-class CollectionAdapter {
+export class CollectionAdapter {
 
     collections: Array<Array<any>>;
 
@@ -601,8 +619,6 @@ class CollectionAdapter {
 
     split: number;
     splitmode: 0 | 1;
-
-
 
     constructor(split: number, splitmode: 0 | 1) {
         this.split = split;
@@ -619,9 +635,7 @@ class CollectionAdapter {
         for (let index = 0; index < this.split; index++) {
             collectionsAssist[index] = [];
         }
-
         while (countItem < length) {
-
 
             if (this.splitmode === 0) {
                 if (countCol%this.split === 0) {
@@ -651,12 +665,7 @@ class CollectionAdapter {
 
             countItem++;
         }
-
         this.collections = collectionsAssist;
-
         return collectionsAssist;
     }
-
-
-
 }
