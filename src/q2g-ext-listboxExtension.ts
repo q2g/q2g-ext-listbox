@@ -42,7 +42,15 @@ let parameter = {
         dimensions: {
             uses: "dimensions",
             min: 1,
-            max: 1
+            max: 1,
+            items: {
+                nullSuppression: {
+                    show: false
+                },
+                dimensionLimits :{
+                    show: false
+                }
+            }
         },
         sorting: {
             component: "items",
@@ -63,18 +71,26 @@ let parameter = {
                     }],
                     defaultValue: true
                 },
-                byState: {
+                byExpression: {
                     component: "items",
                     grouped: false,
                     items: {
-                        byState: {
-                            ref: "properties.byState",
-                            label: "sort by State",
+                        byExpression: {
+                            ref: "properties.byExpression",
+                            label: "sort by Expression",
                             type: "boolean",
                             defaultValue: false
                         },
-                        byStateOrder: {
-                            ref: "properties.byStateOrder",
+                        byExpressionFcn: {
+                            ref: "properties.byExpressionFcn",
+                            type: "string",
+                            expression: "optional",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byExpression;
+                            }
+                        },
+                        byExpressionOrder: {
+                            ref: "properties.byExpressionOrder",
                             component: "dropdown",
                             type: "string",
                             options: [{
@@ -86,13 +102,13 @@ let parameter = {
                             }],
                             defaultValue: "a",
                             show: function (data: IDataProperties) {
-                                return data.properties.byState;
+                                return data.properties.byExpression;
                             }
                         }
                     },
                     show: function (data: IDataProperties) {
                         if (data.properties.sortmode) {
-                            data.properties.byState = false;
+                            data.properties.byExpression = false;
                         }
                         return !data.properties.sortmode;
                     }
@@ -139,7 +155,7 @@ let parameter = {
                             ref: "properties.byNumeric",
                             label: "sort by Numeric",
                             type: "boolean",
-                            defaultValue: false
+                            defaultValue: true
                         },
                         byNumericOrder: {
                             ref: "properties.byNumericOrder",
@@ -160,7 +176,7 @@ let parameter = {
                     },
                     show: function (data: IDataProperties) {
                         if (data.properties.sortmode) {
-                            data.properties.byNumeric = false;
+                            data.properties.byNumeric = true;
                         }
                         return !data.properties.sortmode;
                     }
@@ -173,7 +189,7 @@ let parameter = {
                             ref: "properties.byAscii",
                             label: "sort by Ascii",
                             type: "boolean",
-                            defaultValue: false
+                            defaultValue: true
                         },
                         byAsciiOrder: {
                             ref: "properties.byAsciiOrder",
@@ -194,7 +210,41 @@ let parameter = {
                     },
                     show: function (data: IDataProperties) {
                         if (data.properties.sortmode) {
-                            data.properties.byAscii = false;
+                            data.properties.byAscii = true;
+                        }
+                        return !data.properties.sortmode;
+                    }
+                },
+                byState: {
+                    component: "items",
+                    grouped: false,
+                    items: {
+                        byState: {
+                            ref: "properties.byState",
+                            label: "sort by State",
+                            type: "boolean",
+                            defaultValue: true
+                        },
+                        byStateOrder: {
+                            ref: "properties.byStateOrder",
+                            component: "dropdown",
+                            type: "string",
+                            options: [{
+                                value: "a",
+                                label: "ascending"
+                            }, {
+                                value: "d",
+                                label: "descending"
+                            }],
+                            defaultValue: "a",
+                            show: function (data: IDataProperties) {
+                                return data.properties.byState;
+                            }
+                        }
+                    },
+                    show: function (data: IDataProperties) {
+                        if (data.properties.sortmode) {
+                            data.properties.byState = true;
                         }
                         return !data.properties.sortmode;
                     }
@@ -233,48 +283,6 @@ let parameter = {
                         return !data.properties.sortmode;
                     }
                 },
-                byExpression: {
-                    component: "items",
-                    grouped: false,
-                    items: {
-                        byExpression: {
-                            ref: "properties.byExpression",
-                            label: "sort by Expression",
-                            type: "boolean",
-                            defaultValue: false
-                        },
-                        byExpressionFcn: {
-                            ref: "properties.byExpressionFcn",
-                            type: "string",
-                            expression: "optional",
-                            show: function (data: IDataProperties) {
-                                return data.properties.byExpression;
-                            }
-                        },
-                        byExpressionOrder: {
-                            ref: "properties.byExpressionOrder",
-                            component: "dropdown",
-                            type: "string",
-                            options: [{
-                                value: "a",
-                                label: "ascending"
-                            }, {
-                                value: "d",
-                                label: "descending"
-                            }],
-                            defaultValue: "a",
-                            show: function (data: IDataProperties) {
-                                return data.properties.byExpression;
-                            }
-                        }
-                    },
-                    show: function (data: IDataProperties) {
-                        if (data.properties.sortmode) {
-                            data.properties.byExpression = false;
-                        }
-                        return !data.properties.sortmode;
-                    }
-                }
             }
         },
         settings: {
