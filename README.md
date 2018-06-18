@@ -1,4 +1,5 @@
 # q2g-ext-listbox
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3f494fccf91f4b56b5d2d4673d9406f2)](https://app.codacy.com/app/konne/q2g-ext-listbox?utm_source=github.com&utm_medium=referral&utm_content=q2g/q2g-ext-listbox&utm_campaign=badger)
 [![Greenkeeper badge](https://badges.greenkeeper.io/q2g/q2g-ext-listbox.svg)](https://greenkeeper.io/)
 [![TravisCI](https://travis-ci.org/q2g/q2g-ext-listbox.svg?branch=master)](https://travis-ci.org/q2g/q2g-ext-listboxe)
 [![Downloads](https://m.sense2go.net/downloads.svg?q2g-ext-listbox)](https://m.sense2go.net/extension-package)
