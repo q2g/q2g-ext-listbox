@@ -1,9 +1,9 @@
 //#region Imports
 import { logging,
          utils,
-         directives }               from "../node_modules/davinci.js/dist/umd/daVinci";
-import { RootSingleList}            from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
-import { ListViewDirectiveFactory } from "../node_modules/davinci.js/dist/umd/directives/listview";
+         directives }               from "./node_modules/davinci.js/dist/umd/daVinci";
+import { RootSingleList}            from "./node_modules/davinci.js/dist/umd/utils/rootclasses";
+import { ListViewDirectiveFactory } from "./node_modules/davinci.js/dist/umd/directives/listview";
 import * as template                from "text!./q2g-ext-listboxDirective.html";
 //#endregion
 
