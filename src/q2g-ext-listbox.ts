@@ -6,7 +6,7 @@ import * as template                    from "text!./q2g-ext-listboxExtension.ht
 import { utils,
          logging,
          services,
-         version }                      from "../node_modules/davinci.js/dist/umd/daVinci";
+         version }                      from "./node_modules/davinci.js/dist/umd/daVinci";
 
 import { ListboxDirectiveFactory, 
          IProperties}                   from "./q2g-ext-listboxDirective";
