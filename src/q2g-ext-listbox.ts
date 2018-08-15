@@ -1,12 +1,12 @@
 //#region Imports
-import "css!./q2g-ext-listboxExtension.css";
+import "css!./q2g-ext-listbox.css";
 import * as qvangular                   from "qvangular";
 import * as qlik                        from "qlik";
-import * as template                    from "text!./q2g-ext-listboxExtension.html";
+import * as template                    from "text!./q2g-ext-listbox.html";
 import { utils,
          logging,
          services,
-         version }                      from "../node_modules/davinci.js/dist/umd/daVinci";
+         version }                      from "./node_modules/davinci.js/dist/umd/daVinci";
 
 import { ListboxDirectiveFactory, 
          IProperties}                   from "./q2g-ext-listboxDirective";

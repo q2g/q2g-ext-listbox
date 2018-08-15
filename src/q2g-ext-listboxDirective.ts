@@ -1,9 +1,7 @@
 //#region Imports
 import { logging,
          utils,
-         directives }               from "../node_modules/davinci.js/dist/umd/daVinci";
-import { RootSingleList}            from "../node_modules/davinci.js/dist/umd/utils/rootclasses";
-import { ListViewDirectiveFactory } from "../node_modules/davinci.js/dist/umd/directives/listview";
+         directives }               from "./node_modules/davinci.js/dist/umd/daVinci";
 import * as template                from "text!./q2g-ext-listboxDirective.html";
 //#endregion
 
@@ -39,7 +37,7 @@ interface IQlikSingleListController {
 
 //#endregion
 
-class ListboxController extends RootSingleList implements ng.IController, IQlikSingleListController {
+class ListboxController extends utils.RootSingleList implements ng.IController, IQlikSingleListController {
 
     //#region variables
     field: string = "";
