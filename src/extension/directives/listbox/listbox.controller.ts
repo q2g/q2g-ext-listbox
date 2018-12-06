@@ -1,43 +1,9 @@
-//#region Imports
-import { logging,
-         utils,
-         directives }               from "./node_modules/davinci.js/dist/umd/daVinci";
-import * as template                from "text!./q2g-ext-listboxDirective.html";
-//#endregion
+import { utils, logging, directives } from "../../../node_modules/davinci.js/dist/esm/daVinci";
+import { IQlikSingleListController } from "api/qlik-single-list-controller.interface";
+import { IProperties } from "api/properties.interface";
+import { CollectionAdapter } from "classes/collection-adapter";
 
-//#region Interfaces
-
-export interface IProperties {
-    horizontalmode: boolean;
-    splitcolumns: number;
-    byState: boolean;
-    byFrequency: boolean;
-    byNumeric: boolean;
-    byAscii: boolean;
-    byLoadOrder: boolean;
-    byExpression: boolean;
-    byStateOrder: string;
-    byFrequencyOrder: string;
-    byNumericOrder: string;
-    byAsciiOrder: string;
-    byLoadOrderOrder: string;
-    byExpressionOrder: string;
-    byExpressionFcn: string;
-    fieldSize: number;
-    splitmode: boolean;
-    splitorientation: boolean;
-    sortmode: boolean;
-}
-
-interface IQlikSingleListController {
-    model: EngineAPI.IGenericObject;
-    selectListObjectCallback(pos: number, event?: JQueryKeyEventObject): void;
-    extensionHeaderAccept(): void;
-}
-
-//#endregion
-
-class ListboxController extends utils.RootSingleList implements ng.IController, IQlikSingleListController {
+export class ListboxController extends utils.RootSingleList implements ng.IController, IQlikSingleListController {
 
     //#region variables
     field: string = "";
@@ -161,6 +127,7 @@ class ListboxController extends utils.RootSingleList implements ng.IController, 
         super(timeout, element, scope);
         this.initMenuElements();
 
+        this.timeout = timeout;
 
         $(document).on("click", (e: JQueryEventObject) => {
             try {
@@ -573,97 +540,4 @@ class ListboxController extends utils.RootSingleList implements ng.IController, 
 
     //#endregion
 
-}
-
-export function ListboxDirectiveFactory(rootNameSpace: string): ng.IDirectiveFactory {
-    "use strict";
-    return ($document: ng.IAugmentedJQuery, $injector: ng.auto.IInjectorService, $registrationProvider: any) => {
-        return {
-            restrict: "E",
-            replace: true,
-            template: utils.templateReplacer(template, rootNameSpace),
-            controller: ListboxController,
-            controllerAs: "vm",
-            scope: {},
-            bindToController: {
-                model: "<",
-                theme: "<?",
-                editMode: "<?"
-            },
-            compile: ():void => {
-                utils.checkDirectiveIsRegistrated($injector, $registrationProvider, rootNameSpace,
-                    directives.ListViewDirectiveFactory(rootNameSpace), "Listview");
-                utils.checkDirectiveIsRegistrated($injector, $registrationProvider, rootNameSpace,
-                    directives.ExtensionHeaderDirectiveFactory(rootNameSpace), "ExtensionHeader");
-                utils.checkDirectiveIsRegistrated($injector, $registrationProvider, rootNameSpace,
-                    directives.ShortCutDirectiveFactory(rootNameSpace), "Shortcut");
-            }
-        };
-    };
-}
-
-export class CollectionAdapter {
-
-    collections: Array<Array<any>>;
-
-
-    private _itemsPagingHeight: number = 0;
-    public get itemsPagingHeight() : number {
-        return this._itemsPagingHeight;
-    }
-    public set itemsPagingHeight(v : number) {
-        this._itemsPagingHeight = v;
-    }
-
-    split: number;
-    splitmode: 0 | 1;
-
-    constructor(split: number, splitmode: 0 | 1) {
-        this.split = split;
-        this.splitmode = splitmode;
-    }
-
-    calcCollections (collection: any[]) {
-        let length = collection.length;
-        let countItem = 0;
-        let countCol = 0;
-        let collectionsAssist;
-
-        collectionsAssist = new Array(this.split);
-        for (let index = 0; index < this.split; index++) {
-            collectionsAssist[index] = [];
-        }
-        while (countItem < length) {
-
-            if (this.splitmode === 0) {
-                if (countCol%this.split === 0) {
-                    countCol = 0;
-                }
-                collectionsAssist[countCol].push(collection[countItem]);
-                countCol++;
-            }
-
-            if (this.splitmode === 1) {
-
-                if (countItem >= (this.itemsPagingHeight * (countCol+1))) {
-                    countCol++;
-                }
-
-                if (countCol >= this.split) {
-                    break;
-                }
-
-                try {
-
-                    collectionsAssist[countCol].push(collection[countItem]);
-                } catch (error) {
-                    console.error("error", error);
-                }
-            }
-
-            countItem++;
-        }
-        this.collections = collectionsAssist;
-        return collectionsAssist;
-    }
 }

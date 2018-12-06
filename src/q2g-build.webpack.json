@@ -1,0 +1,7 @@
+{
+    "entryFile": "./extension/listbox.extension.ts",
+    "outFileName": "q2g-ext-listbox",
+    "outputDirectory": "./dist",
+    "tsConfigFile": "q2g-build.tsconfig.json",
+    "watch": true
+}

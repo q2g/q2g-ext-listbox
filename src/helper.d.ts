@@ -3,7 +3,5 @@
 }
 
 interface IQVAngular {
-
     $injector: angular.auto.IInjectorService;
-
 }
