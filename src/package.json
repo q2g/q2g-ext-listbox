@@ -1,11 +1,11 @@
 {
   "name": "q2g-ext-listbox",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "description": "displayes one Dimension",
   "repository": {
     "type": "git",
-    "url": "https://github.com/q2g/q2g-ext-list"
+    "url": "https://github.com/q2g/q2g-ext-listbox"
   },
   "author": "Thomas Häning, Konrad Mattheis (qlik2go) ",
   "devDependencies": {
@@ -20,14 +20,14 @@
     "davinci.js": "1.4.5"
   },
   "qext": {
-      "dependencies": {
-          "qlik-sense": ">=3.2.x"
-      },
-      "icon": "filterpane",
-      "name": "q2g Listbox",
-      "type": "visualization"
+    "dependencies": {
+      "qlik-sense": ">=3.2.x"
+    },
+    "icon": "filterpane",
+    "name": "q2g Listbox",
+    "type": "visualization"
   },
   "scripts": {
-      "build": "node node_modules/q2g-build --builder extension --config q2g.extension.json"
+    "build": "node node_modules/q2g-build --builder extension --config q2g.extension.json"
   }
 }
