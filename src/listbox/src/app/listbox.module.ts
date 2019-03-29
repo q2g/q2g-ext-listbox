@@ -12,21 +12,19 @@ import { ComponentFactoryResolver } from "@angular/core";
   entryComponents: [BootstrapComponent, ListboxComponent]
 })
 export class ListboxModule implements DoBootstrap {
-
-  public constructor(
-    private injector: Injector,
-  ) {}
+  public constructor(private injector: Injector) {}
 
   ngDoBootstrap() {
-
     const bootrapInjector = Injector.create(
-      [{
+      [
+        {
           provide: "ExtensionView",
           useFactory: (factoryResolver: ComponentFactoryResolver) => {
             return factoryResolver.resolveComponentFactory(ListboxComponent);
           },
           deps: [ComponentFactoryResolver]
-      }],
+        }
+      ],
       this.injector
     );
 

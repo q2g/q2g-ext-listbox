@@ -1,9 +1,8 @@
 ## Typescript q2g Files
 *.map
-*.js
 *.css
+src/extension/**/*.js
 dist/*.d.ts
-package-lock.json
 
 ## Typescript q2g Folders
 node_modules/
