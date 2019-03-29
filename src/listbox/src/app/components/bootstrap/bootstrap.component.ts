@@ -19,17 +19,15 @@ export class BootstrapComponent implements AfterViewInit {
         private injector: Injector
     ) {}
 
-    ngAfterViewInit() {
+    async ngAfterViewInit() {
         /** load model and bootstrap extension view */
-        this.app.getObject(this.objectId)
-        .then((model: EngineAPI.IGenericObject) => {
-            this.bootstrapView(model);
-        });
+        const currentApp: any = await this.app.getObject(this.objectId);
+        this.bootstrapView(currentApp.enigmaModel);
     }
 
     /** bootstrap extension view */
-    private bootstrapView(app: EngineAPI.IGenericObject) {
+    private bootstrapView(model: EngineAPI.IGenericObject) {
         const extensionView = this.extensionRoot.createComponent<ExtensionComponent>(this.view, 0, this.injector);
-        extensionView.instance.model = app;
+        extensionView.instance.model = model;
     }
 }

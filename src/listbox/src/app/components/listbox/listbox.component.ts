@@ -7,12 +7,19 @@ import { ExtensionComponent } from '../../api/extension.component.interface';
 })
 export class ListboxComponent implements OnInit, ExtensionComponent {
 
+    private _model: EngineAPI.IGenericObject;
+
     @Input()
-    public set model(data: any) {
-        console.log("set a model");
+    public set model(model: EngineAPI.IGenericObject) {
+        this._model = model;
+        this._model.on("changed", () => this.modelChange());
+        this._model.emit("changed");
     }
 
-    ngOnInit() {
-        console.log("init goes on");
+    async ngOnInit() {
+    }
+
+    private async modelChange() {
+        let layout = await this._model.getLayout();
     }
 }
