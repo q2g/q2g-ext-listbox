@@ -18,7 +18,7 @@ qvangular.service<services.IRegistrationProvider>("$registrationProvider", servi
 //#endregion
 
 //#region Logger
-logging.LogConfig.SetLogLevel("*", logging.LogLevel.info);
+logging.LogConfig.SetLogLevel("*", logging.LogLevel.debug);
 let logger = new logging.Logger("Main");
 //#endregion
 
@@ -349,7 +349,7 @@ let parameter = {
                                     ref: "properties.splitcolumns",
                                     label: "how many columns",
                                     type: "number",
-                                    defaultValue: "1",
+                                    defaultValue: 1,
                                     show: function (data: IDataProperties) {
                                         if (!data.properties.splitmode) {
                                             data.properties.splitcolumns = 1;
