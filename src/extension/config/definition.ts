@@ -1,47 +1,12 @@
-//#region Imports
-import "css!./q2g-ext-listbox.css";
-import * as qvangular                   from "qvangular";
-import * as qlik                        from "qlik";
-import * as template                    from "text!./q2g-ext-listbox.html";
-import { utils,
-         logging,
-         services,
-         version }                      from "./node_modules/davinci.js/dist/umd/daVinci";
+import { IDataProperties } from "../api/data-properties.interface";
 
-import { ListboxDirectiveFactory, 
-         IProperties}                   from "./q2g-ext-listboxDirective";
-//#endregion
-
-//#region registrate services
-qvangular.service<services.IRegistrationProvider>("$registrationProvider", services.RegistrationProvider)
-.implementObject(qvangular);
-//#endregion
-
-//#region Logger
-logging.LogConfig.SetLogLevel("*", logging.LogLevel.debug);
-let logger = new logging.Logger("Main");
-//#endregion
-
-//#region registrate directives
-var $injector = qvangular.$injector;
-utils.checkDirectiveIsRegistrated($injector, qvangular, "", ListboxDirectiveFactory("Listboxextension"),
-    "ListboxExtension");
-//#endregion
-
-//#region interfaces
-interface IDataProperties {
-    properties: IProperties;
-}
-//#endregion
-
-//#region set extension parameters
-let parameter = {
+export const definition = {
     type: "items",
     component: "accordion",
     items: {
         dimensions: {
             uses: "dimensions",
-            min: 1,
+            min: 0,
             max: 1,
             items: {
                 nullSuppression: {
@@ -386,64 +351,3 @@ let parameter = {
         }
     }
 };
-//#endregion
-
-class RootExtension {
-
-    model: EngineAPI.IGenericObject;
-    qlik: RootAPI.IRoot;
-
-    constructor(model:EngineAPI.IGenericObject, qlik: RootAPI.IRoot) {
-        this.model = model;
-        this.qlik = qlik;
-    }
-
-    /**
-     * isEditMode
-     * checks if extension is in edit mode or in anylyse mode
-     */
-    public isEditMode() {
-        try {
-            if (this.qlik.navigation.getMode() === "analysis") {
-                return false;
-            } else {
-                return true;
-            }
-        } catch (error) {
-            console.error("Error in function isEditMode", error);
-        }
-    }
-}
-
-class ListExtension extends RootExtension {
-
-    constructor(model: EngineAPI.IGenericObject) {
-        super(model, qlik);
-    }
-
-}
-
-export = {
-    definition: parameter,
-    initialProperties: { },
-    template: template,
-    support: {
-        snapshot: false,
-        export: false,
-        exportData: false
-    },
-    paint: () => {
-        //
-    },
-    resize: () => {
-        //
-    },
-    controller: ["$scope", function (scope: utils.IVMScope<ListExtension>) {
-        console.log("Extension is using daVinci.js Verions: " + version);
-        scope.vm = new ListExtension(utils.getEnigma(scope));
-    }]
-};
-
-
-
-
