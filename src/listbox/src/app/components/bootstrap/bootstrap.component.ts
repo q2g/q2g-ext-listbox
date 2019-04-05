@@ -1,10 +1,19 @@
-import { Component, Input, Inject, ViewChild, AfterViewInit, ComponentFactory, ViewContainerRef, Injector } from "@angular/core";
+import {
+    Component,
+    Input,
+    Inject,
+    ViewChild,
+    AfterViewInit,
+    ComponentFactory,
+    ViewContainerRef,
+    Injector
+} from "@angular/core";
 import { App } from "../../services/qlik-global-module.factory";
 import { ExtensionComponent } from "../../api/extension.component.interface";
 
 @Component({
-  selector: "q2g-ngx-extension",
-  templateUrl: "bootstrap.component.html"
+    selector: "q2g-ngx-extension",
+    templateUrl: "bootstrap.component.html"
 })
 export class BootstrapComponent implements AfterViewInit {
     @Input()
@@ -14,7 +23,8 @@ export class BootstrapComponent implements AfterViewInit {
     private extensionRoot: ViewContainerRef;
 
     constructor(
-        @Inject("ExtensionView") private view: ComponentFactory<ExtensionComponent>,
+        @Inject("ExtensionView")
+        private view: ComponentFactory<ExtensionComponent>,
         @Inject(App) private app: EngineAPI.IApp,
         private injector: Injector
     ) {}
@@ -27,7 +37,9 @@ export class BootstrapComponent implements AfterViewInit {
 
     /** bootstrap extension view */
     private bootstrapView(model: EngineAPI.IGenericObject) {
-        const extensionView = this.extensionRoot.createComponent<ExtensionComponent>(this.view, 0, this.injector);
+        const extensionView = this.extensionRoot.createComponent<
+            ExtensionComponent
+        >(this.view, 0, this.injector);
         extensionView.instance.model = model;
     }
 }

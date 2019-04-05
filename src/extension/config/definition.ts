@@ -6,8 +6,8 @@ export const definition = {
     items: {
         dimensions: {
             uses: "dimensions",
-            min: 0,
-            max: 1,
+            min: 1,
+            max: 2,
             items: {
                 nullSuppression: {
                     show: false

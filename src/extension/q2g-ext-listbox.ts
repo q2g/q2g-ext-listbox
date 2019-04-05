@@ -3,7 +3,7 @@ import "./listbox.element";
 
 export = {
     definition: definition,
-    initialProperties: { },
+    initialProperties: {},
     template: '<div></div>',
     support: {
         snapshot: false,

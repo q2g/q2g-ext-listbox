@@ -7,7 +7,7 @@ const concat = require("concat");
  * build ngx component
  */
 const cliPath = path.resolve(process.cwd(), 'node_modules/@angular/cli/bin/ng');
-const args = [cliPath, "build", "--watch"];
+const args = [cliPath, "build", "--watch" , "--preserve-symlinks"];
 let isCreateBundle = false;
 
 cow.say(` Create bundle for listbox, this can take a while.`);
@@ -25,6 +25,10 @@ ngProcess.stdout.on("data", (data) => {
         buildDevBundle();
         isCreateBundle = false;
     }
+});
+
+ngProcess.stdout.on("error", (error) => {
+    console.log(error);
 });
 
 /** @todo create bundle for development mode */
