@@ -8,8 +8,9 @@ import {
 } from "@angular/core";
 import { ExtensionComponent } from "../../api/extension.component.interface";
 import { ViewportControl } from "ngx-customscrollbar";
-import { debounceQlikSession } from 'src/app/services/create-session.operator';
-import { Subject } from 'rxjs';
+import { debounceQlikSession } from "src/app/services/create-session.operator";
+import { ReplaySubject } from "rxjs";
+import { switchMap } from 'rxjs/operators';
 
 @Component({
     selector: "q2g-listbox",
@@ -25,12 +26,11 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
     private session: EngineAPI.IGenericObject;
 
-    private openSession: Subject<EngineAPI.IApp>;
+    private openSession: ReplaySubject<EngineAPI.IApp>;
 
     @Input()
     public set model(model: EngineAPI.IGenericObject) {
-
-        /** 
+        /**
          * this could called twice in a row before session is created
          * that will cause a bug we have one open connection left thats not
          * what we want, try to debounce the request
@@ -48,16 +48,50 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     }
 
     public constructor(private changeDetector: ChangeDetectorRef) {
-        this.openSession = new Subject();
+        this.openSession = new ReplaySubject(1);
     }
 
     public ngOnInit() {
 
+        /** @todo move to own function */
+        const listParam: EngineAPI.IGenericListProperties = {
+            qInfo: {
+                qType: "ListObject"
+            },
+            qListObjectDef: {
+                qStateName: "$",
+                qAutoSortByState: {
+                    qDisplayNumberOfRows: -1
+                },
+                qLibraryId: "",
+                qDef: {
+                    qFieldDefs: ["Name"]
+                },
+                qFrequencyMode: "NX_FREQUENCY_NONE",
+                qInitialDataFetch: [
+                    {
+                        qHeight: 20,
+                        qLeft: 0,
+                        qTop: 0,
+                        qWidth: 1
+                    }
+                ],
+                qShowAlternatives: true
+            }
+        };
+
         this.openSession
-            .pipe(debounceQlikSession())
-            .subscribe(() => {
-                // session has been created
-                // last request we submitted should be taken
+            .pipe(
+                /** debounce qlik sessions if multiple will be open only the last one will taken */
+                debounceQlikSession<
+                    EngineAPI.IGenericListProperties,
+                    EngineAPI.IGenericList
+                >(listParam),
+                /** if session has been opened we want to get current data for testing issues */
+                switchMap((session) => session.getLayout())
+            )
+            .subscribe(response => {
+                console.log(response);
             });
     }
 
@@ -66,54 +100,10 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     }
 
     /**
-     * handle model change event
-     */
-    private async modelChange() {
-        const layout: EngineAPI.IGenericHyperCubeLayout = (await this._model.getLayout()) as EngineAPI.IGenericHyperCubeLayout;
-
-        /** @todo get layout data */
-
-        /** apply items */
-        this.changeDetector.detectChanges();
-    }
-
-    /**
-     * create new session object
-     * @param {EngineAPI.IApp} app
-     */
-    private async createSession(
-        app: EngineAPI.IApp
-    ): Promise<EngineAPI.IGenericObject> {
-        const session = await app.createSessionObject({
-            qInfo: {
-                qType: "q2gListboxListObject"
-            }
-        });
-        return session;
-    }
-
-    /**
      * destroy existing session object
-     * @param {string} sessionId 
+     * @param {string} sessionId
      */
     private destroySession(sessionId: string) {
         this._model.app.destroySessionObject(sessionId);
-    }
-
-    /**
-     * initialize model
-     * @param model
-     */
-    private async initializeSession(model) {
-
-        /** if session allready exists remove session before */
-        if (this.session) {
-            await this.destroySession(this.session.id);
-        }
-
-        /** create new session */
-        this.session = await this.createSession(model);
-
-        /** @todo unregister events since we dont need them anymore */
     }
 }
