@@ -23,7 +23,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
     public async ngOnInit() {
         this.sessionObj = await this._model.app.createSessionObject(this.createSessionParams());
-        this.listSource = new GenericListSource(this.sessionObj);
+        this.listSource = new GenericListSource(this.sessionObj, { pageSize: 20 });
     }
 
     public ngOnDestroy() {
