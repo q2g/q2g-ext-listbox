@@ -10,7 +10,9 @@ export = {
         export: false,
         exportData: false
     },
-    init: () => {},
+    init: ($root) => {
+        // $element.append(`<q2g-ngx-extension object-id=${id}></q2g-ngx-extension>`);
+    },
     paint: () => {},
     resize: () => {},
     controller: ["$scope", "$element", ($scope: any, $element) => {

@@ -1,63 +1,44 @@
-import {
-    Component,
-    Input,
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    OnDestroy,
-    OnInit
-} from "@angular/core";
+import { Component, Input, OnDestroy, OnInit } from "@angular/core";
 import { ExtensionComponent } from "../../api/extension.component.interface";
-import { ViewportControl } from "ngx-customscrollbar";
-import { debounceQlikSession } from "src/app/services/create-session.operator";
-import { ReplaySubject } from "rxjs";
-import { switchMap } from 'rxjs/operators';
+import { GenericListSource } from 'davinci.js';
 
 @Component({
     selector: "q2g-listbox",
     templateUrl: "listbox.component.html",
     styleUrls: ["./listbox.component.scss"],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    viewProviders: [ViewportControl]
+    // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
-    public items: any[];
+
+    public listSource: GenericListSource;
 
     private _model: EngineAPI.IGenericObject;
 
-    private session: EngineAPI.IGenericObject;
-
-    private openSession: ReplaySubject<EngineAPI.IApp>;
+    private sessionObj: EngineAPI.IGenericList;
 
     @Input()
     public set model(model: EngineAPI.IGenericObject) {
-        /**
-         * this could called twice in a row before session is created
-         * that will cause a bug we have one open connection left thats not
-         * what we want, try to debounce the request
-         */
-        if (model) {
-            this._model = model;
-            // send model app to try open a session
-            this.openSession.next(model.app);
-            return;
-        }
-
-        if (!model && this.session) {
-            this.destroySession(this.session.id);
-        }
+        this._model = model;
     }
 
-    public constructor(private changeDetector: ChangeDetectorRef) {
-        this.openSession = new ReplaySubject(1);
+    public async ngOnInit() {
+        this.sessionObj = await this._model.app.createSessionObject(this.createSessionParams());
+        this.listSource = new GenericListSource(this.sessionObj);
     }
 
-    public ngOnInit() {
+    public ngOnDestroy() {
+        this._model.app.destroySessionObject(this.sessionObj.id);
+        this._model = null;
+    }
 
-        /** @todo move to own function */
+    public onSearch(val) {
+    }
+
+    /** create session params for generic list */
+    private createSessionParams(): EngineAPI.IGenericListProperties {
+
         const listParam: EngineAPI.IGenericListProperties = {
-            qInfo: {
-                qType: "ListObject"
-            },
+            qInfo: { qType: "ListObject" },
             qListObjectDef: {
                 qStateName: "$",
                 qAutoSortByState: {
@@ -70,40 +51,15 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
                 qFrequencyMode: "NX_FREQUENCY_NONE",
                 qInitialDataFetch: [
                     {
-                        qHeight: 20,
+                        qHeight: 0,
                         qLeft: 0,
                         qTop: 0,
-                        qWidth: 1
+                        qWidth: 0
                     }
                 ],
                 qShowAlternatives: true
             }
         };
-
-        this.openSession
-            .pipe(
-                /** debounce qlik sessions if multiple will be open only the last one will taken */
-                debounceQlikSession<
-                    EngineAPI.IGenericListProperties,
-                    EngineAPI.IGenericList
-                >(listParam),
-                /** if session has been opened we want to get current data for testing issues */
-                switchMap((session) => session.getLayout())
-            )
-            .subscribe(response => {
-                console.log(response);
-            });
-    }
-
-    public ngOnDestroy() {
-        this.model = null;
-    }
-
-    /**
-     * destroy existing session object
-     * @param {string} sessionId
-     */
-    private destroySession(sessionId: string) {
-        this._model.app.destroySessionObject(sessionId);
+        return listParam;
     }
 }
