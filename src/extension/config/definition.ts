@@ -1,4 +1,5 @@
 import { IDataProperties } from "../api/data-properties.interface";
+import { Sort } from "../api/porperties.interface";
 
 export const definition = {
     type: "items",
@@ -23,39 +24,39 @@ export const definition = {
             grouped: true,
             items: {
                 sortmode: {
-                    ref: "properties.sortmode",
+                    ref: "properties.sort.mode",
                     label: "Sorting",
                     component: "switch",
                     type: "boolean",
                     options: [{
-                        value: false,
+                        value: Sort.Mode.INDIVIDUAL,
                         label: "individual"
                     }, {
-                        value: true,
+                        value: Sort.Mode.AUTOMATIC,
                         label: "automatic"
                     }],
-                    defaultValue: true
+                    defaultValue: Sort.Mode.AUTOMATIC
                 },
                 byExpression: {
                     component: "items",
                     grouped: false,
                     items: {
                         byExpression: {
-                            ref: "properties.byExpression",
+                            ref: "properties.sort.by.expression.enabled",
                             label: "sort by Expression",
                             type: "boolean",
                             defaultValue: false
                         },
                         byExpressionFcn: {
-                            ref: "properties.byExpressionFcn",
+                            ref: "properties.sort.by.expressionFcn.value",
                             type: "string",
                             expression: "optional",
                             show: function (data: IDataProperties) {
-                                return data.properties.byExpression;
+                                return data.properties.sort.by.expression.enabled;
                             }
                         },
                         byExpressionOrder: {
-                            ref: "properties.byExpressionOrder",
+                            ref: "properties.sort.by.expression.orderBy",
                             component: "dropdown",
                             type: "string",
                             options: [{
@@ -67,15 +68,15 @@ export const definition = {
                             }],
                             defaultValue: "a",
                             show: function (data: IDataProperties) {
-                                return data.properties.byExpression;
+                                return data.properties.sort.by.expression.orderBy;
                             }
                         }
                     },
                     show: function (data: IDataProperties) {
-                        if (data.properties.sortmode) {
-                            data.properties.byExpression = false;
+                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                            data.properties.sort.by.expression.enabled = false;
                         }
-                        return !data.properties.sortmode;
+                        return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
                     }
                 },
                 byFrequency: {
@@ -83,13 +84,13 @@ export const definition = {
                     grouped: false,
                     items: {
                         byState: {
-                            ref: "properties.byFrequency",
+                            ref: "properties.sort.by.frequency.enabled",
                             label: "sort by Frequency",
                             type: "boolean",
                             defaultValue: false
                         },
                         byFrequencyOrder: {
-                            ref: "properties.byFrequencyOrder",
+                            ref: "properties.sort.by.frequency.orderBy",
                             component: "dropdown",
                             type: "string",
                             options: [{
@@ -101,15 +102,15 @@ export const definition = {
                             }],
                             defaultValue: "a",
                             show: function (data: IDataProperties) {
-                                return data.properties.byFrequency;
+                                return data.properties.sort.by.frequency.orderBy;
                             }
                         }
                     },
                     show: function (data: IDataProperties) {
-                        if (data.properties.sortmode) {
-                            data.properties.byFrequency = false;
+                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                            data.properties.sort.by.frequency.enabled = false;
                         }
-                        return !data.properties.sortmode;
+                        return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
                     }
                 },
                 byNumeric: {
@@ -117,13 +118,13 @@ export const definition = {
                     grouped: false,
                     items: {
                         byNumeric: {
-                            ref: "properties.byNumeric",
+                            ref: "properties.sort.by.numeric.enabled",
                             label: "sort by Numeric",
                             type: "boolean",
                             defaultValue: true
                         },
                         byNumericOrder: {
-                            ref: "properties.byNumericOrder",
+                            ref: "properties.sort.by.numeric.orderBy",
                             component: "dropdown",
                             type: "string",
                             options: [{
@@ -135,15 +136,15 @@ export const definition = {
                             }],
                             defaultValue: "a",
                             show: function (data: IDataProperties) {
-                                return data.properties.byNumeric;
+                                return data.properties.sort.by.numeric.orderBy;
                             }
                         }
                     },
                     show: function (data: IDataProperties) {
-                        if (data.properties.sortmode) {
-                            data.properties.byNumeric = true;
+                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                            data.properties.sort.by.numeric.enabled = true;
                         }
-                        return !data.properties.sortmode;
+                        return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
                     }
                 },
                 byAscii: {
@@ -151,13 +152,13 @@ export const definition = {
                     grouped: false,
                     items: {
                         byAscii: {
-                            ref: "properties.byAscii",
+                            ref: "properties.sort.by.ascii.enabled",
                             label: "sort by Ascii",
                             type: "boolean",
                             defaultValue: true
                         },
                         byAsciiOrder: {
-                            ref: "properties.byAsciiOrder",
+                            ref: "properties.sort.by.ascii.orderBy",
                             component: "dropdown",
                             type: "string",
                             options: [{
@@ -169,15 +170,15 @@ export const definition = {
                             }],
                             defaultValue: "a",
                             show: function (data: IDataProperties) {
-                                return data.properties.byAscii;
+                                return data.properties.sort.by.ascii.orderBy;
                             }
                         }
                     },
                     show: function (data: IDataProperties) {
-                        if (data.properties.sortmode) {
-                            data.properties.byAscii = true;
+                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                            data.properties.sort.by.ascii.enabled = true;
                         }
-                        return !data.properties.sortmode;
+                        return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
                     }
                 },
                 byState: {
@@ -185,13 +186,13 @@ export const definition = {
                     grouped: false,
                     items: {
                         byState: {
-                            ref: "properties.byState",
+                            ref: "properties.sort.by.state.enabled",
                             label: "sort by State",
                             type: "boolean",
                             defaultValue: true
                         },
                         byStateOrder: {
-                            ref: "properties.byStateOrder",
+                            ref: "properties.sort.by.start.orderBy",
                             component: "dropdown",
                             type: "string",
                             options: [{
@@ -203,15 +204,15 @@ export const definition = {
                             }],
                             defaultValue: "a",
                             show: function (data: IDataProperties) {
-                                return data.properties.byState;
+                                return data.properties.sort.by.state.orderBy;
                             }
                         }
                     },
                     show: function (data: IDataProperties) {
-                        if (data.properties.sortmode) {
-                            data.properties.byState = true;
+                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                            data.properties.sort.by.state.enabled = true;
                         }
-                        return !data.properties.sortmode;
+                        return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
                     }
                 },
                 byLoadOrder: {
@@ -219,13 +220,13 @@ export const definition = {
                     grouped: false,
                     items: {
                         byLoadOrder: {
-                            ref: "properties.byLoadOrder",
+                            ref: "properties.sort.by.loadOrder.enabled",
                             label: "sort by Load Order",
                             type: "boolean",
                             defaultValue: false
                         },
                         byLoadOrderOrder: {
-                            ref: "properties.byLoadOrderOrder",
+                            ref: "properties.sort.by.loadOrder.orderBy",
                             component: "dropdown",
                             type: "string",
                             options: [{
@@ -237,15 +238,15 @@ export const definition = {
                             }],
                             defaultValue: "a",
                             show: function (data: IDataProperties) {
-                                return data.properties.byLoadOrder;
+                                return data.properties.sort.by.loadOrder.orderBy;
                             }
                         }
                     },
                     show: function (data: IDataProperties) {
-                        if (data.properties.sortmode) {
-                            data.properties.byLoadOrder = false;
+                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                            data.properties.sort.by.loadOrder.enabled = false;
                         }
-                        return !data.properties.sortmode;
+                        return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
                     }
                 },
             }

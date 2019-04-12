@@ -7,7 +7,6 @@ import {
     ComponentFactory,
     ViewContainerRef,
     Injector,
-    ChangeDetectorRef
 } from "@angular/core";
 import { App } from "../../services/qlik-global-module.factory";
 import { ExtensionComponent } from "../../api/extension.component.interface";
@@ -28,7 +27,6 @@ export class BootstrapComponent implements AfterViewInit {
         private view: ComponentFactory<ExtensionComponent>,
         @Inject(App) private app: EngineAPI.IApp,
         private injector: Injector,
-        private changeDetector: ChangeDetectorRef
     ) {}
 
     async ngAfterViewInit() {

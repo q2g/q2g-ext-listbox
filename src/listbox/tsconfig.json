@@ -19,6 +19,9 @@
       "gauguin/*": [
         "dist/gauguin/*",
         "dist/gauguin/*"
+      ],
+      "extension/*": [
+          "../extension/*"
       ]
     }
   }
