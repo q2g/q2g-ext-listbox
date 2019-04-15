@@ -192,7 +192,7 @@ export const definition = {
                             defaultValue: true
                         },
                         byStateOrder: {
-                            ref: "properties.sort.by.start.orderBy",
+                            ref: "properties.sort.by.state.orderBy",
                             component: "dropdown",
                             type: "string",
                             options: [{

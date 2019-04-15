@@ -23,8 +23,7 @@ export class BootstrapComponent implements AfterViewInit {
     private extensionRoot: ViewContainerRef;
 
     constructor(
-        @Inject("ExtensionView")
-        private view: ComponentFactory<ExtensionComponent>,
+        @Inject("ExtensionView") private view: ComponentFactory<ExtensionComponent>,
         @Inject(App) private app: EngineAPI.IApp,
         private injector: Injector,
     ) {}
