@@ -13,6 +13,7 @@ import { ExtensionComponent } from "../../api/extension.component.interface";
 
 @Component({
     selector: "q2g-ngx-extension",
+    styleUrls: ["./bootstrap.component.scss"],
     templateUrl: "bootstrap.component.html"
 })
 export class BootstrapComponent implements AfterViewInit {

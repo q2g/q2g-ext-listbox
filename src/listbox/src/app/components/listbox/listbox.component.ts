@@ -3,13 +3,11 @@ import { ExtensionComponent } from "../../api/extension.component.interface";
 import { GenericListSource } from "davinci.js";
 import { Sort } from "extension/api/porperties.interface";
 import { Subject } from "rxjs";
-import { setPreviousOrParentTNode } from '@angular/core/src/render3/state';
 
 @Component({
     selector: "q2g-listbox",
     templateUrl: "listbox.component.html",
     styleUrls: ["./listbox.component.scss"]
-    // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     public listSource: GenericListSource;
