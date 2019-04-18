@@ -1,8 +1,10 @@
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from "@angular/core";
 import { ExtensionComponent } from "../../api/extension.component.interface";
 import { GenericListSource } from "davinci.js";
 import { Sort } from "extension/api/porperties.interface";
 import { Subject } from "rxjs";
+import { IListConfig } from 'davinci.js/listview/api/list-config.interface';
+import { ListBoxProperties } from 'src/app/api/properties';
 
 @Component({
     selector: "q2g-listbox",
@@ -10,6 +12,7 @@ import { Subject } from "rxjs";
     styleUrls: ["./listbox.component.scss"]
 })
 export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
+
     public listSource: GenericListSource;
 
     private _model: EngineAPI.IGenericObject;
@@ -30,6 +33,8 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         this.registerEvents();
     }
 
+    public orientation: "vertical" | "horizontal" = "vertical";
+
     public async ngOnInit() {
         // create a deep clone from object properties since we resolve a reference
         // if we call this._model.getProperties() again this will change propeties
@@ -38,13 +43,12 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
             this.createSessionProperties()
         );
 
-        const sesProp = await this.sessionObj.getProperties();
-        console.dir(sesProp);
-
-        const config = {
+        const config: IListConfig = {
             pageSize: 20
         };
+
         this.listSource = new GenericListSource(this.sessionObj, config);
+        this.setOrientation();
     }
 
     /**
@@ -58,7 +62,15 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         this._model = null;
     }
 
-    public onSearch(val) {}
+    public onSearch(val) {
+        /** we could pass event through not that bad solution */
+        this.sessionObj.searchListObjectFor("/qListObjectDef", val);
+    }
+
+    /** root cell has been resized in grid, this is not the same as window resize */
+    public rootCellResized(): void {
+        console.log("root cell resized and we know it");
+    }
 
     /** create session params for generic list */
     private createSessionProperties(): EngineAPI.IGenericListProperties {
@@ -129,7 +141,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         );
     }
 
-    /** check properties have been changed so we have to redraw data */
+    /** check properties have been changed so we have to redraw data could be also placed in bootstrap component */
     private async handleModelChanged() {
 
         /** get current and new extension properties */
@@ -147,6 +159,8 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         let noChange = JSON.stringify(newProperties) === JSON.stringify(curProperties);
             noChange = noChange && newFieldDefs.sort().toString() === curFieldDefs.sort().toString();
 
+        /** @todo skip orientation since this only change the view of data not the data itself */
+
         /** neither extension properties nor field defs has been changed so we could skip */
         if (noChange) {
             return;
@@ -158,5 +172,16 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         /** create new session properties and update session object */
         const sessionProperties = await this.createSessionProperties();
         this.sessionObj.setProperties(sessionProperties);
+        this.setOrientation();
+    }
+
+    private setOrientation() {
+        switch (this.properties.properties.orientation) {
+            case ListBoxProperties.Orientation.vertical: 
+                this.orientation = "vertical";
+                break;
+            default:
+                this.orientation = "horizontal";
+        }
     }
 }

@@ -264,16 +264,16 @@ export const definition = {
                             label: "orientation",
                             grouped: false,
                             items: {
-                                horizontalmode: {
-                                    ref: "properties.horizontalmode",
+                                orientation: {
+                                    ref: "properties.orientation",
                                     label: "switch orientation",
                                     component: "switch",
                                     type: "boolean",
                                     options: [{
-                                        value: false,
+                                        value: 0,
                                         label: "vertical"
                                     }, {
-                                        value: true,
+                                        value: 1,
                                         label: "horizontal"
                                     }],
                                     defaultValue: false

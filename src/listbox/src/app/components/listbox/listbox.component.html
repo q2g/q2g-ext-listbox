@@ -1,2 +1,2 @@
-<davinci-search [placeholder]="'foobar'"></davinci-search>
-<davinci-listview [dataSource]="listSource"></davinci-listview>
+<davinci-search [placeholder]="'foobar'" (changed)="onSearch($event)"></davinci-search>
+<davinci-listview [dataSource]="listSource" [orientation]="orientation"></davinci-listview>

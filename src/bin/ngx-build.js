@@ -33,7 +33,6 @@ ngProcess.stdout.on("error", (error) => {
 
 /** @todo create bundle for development mode */
 function buildDevBundle() {
-    process.stdout.write('do something nice here');
     const files = [
         path.resolve(process.cwd(), './listbox/dist/runtime.js'),
         path.resolve(process.cwd(), './listbox/dist/polyfills.js'),
