@@ -1,5 +1,6 @@
 import { definition } from "./config/definition";
 import "./listbox.element";
+import * as qlik from "qlik";
 
 export = {
     definition: definition,
@@ -17,6 +18,7 @@ export = {
     resize: () => {},
     controller: ["$scope", "$element", ($scope: any, $element) => {
 
+
         /** 
          * if the element dont have an id, create a new unique id
          * so we could find the element again which is needed to determine 
@@ -30,7 +32,16 @@ export = {
         /** this is the extension id which will be used to get correct app model */
         const id = $scope.layout.qInfo.qId;
 
-        // angular 1 Steinzeit Watcher $scope.watch ( width, height ) -> muss als argument mit durchgereicht werden
-        $element.append(`<q2g-ngx-extension object-id=${id} root-cell=${cell.attr('id')}></q2g-ngx-extension>`);
+        const extEl: JQuery = $element.append(`<q2g-ngx-extension mode=${(test())} object-id=${id} root-cell=${cell.attr('id')} ></q2g-ngx-extension>`);
+        
+        $scope.$watch(() => qlik.navigation.getMode(), (cur: string) => {
+            window.setTimeout(() => {
+                extEl.find('q2g-ngx-extension').attr("mode", cur);
+            }, 0)
+        });
     }]
 };
+
+function test() {
+    return qlik.navigation.getMode()
+}

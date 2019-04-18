@@ -1,6 +1,6 @@
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, ViewChild } from "@angular/core";
 import { ExtensionComponent } from "../../api/extension.component.interface";
-import { GenericListSource } from "davinci.js";
+import { GenericListSource, ListViewComponent } from "davinci.js";
 import { Sort } from "extension/api/porperties.interface";
 import { Subject } from "rxjs";
 import { IListConfig } from 'davinci.js/listview/api/list-config.interface';
@@ -26,6 +26,10 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     public constructor() {
         this.destroy$ = new Subject();
     }
+
+    @ViewChild(ListViewComponent)
+    /** @todo ignore this */
+    private listView: ListViewComponent<any>;
 
     @Input()
     public set model(model: EngineAPI.IGenericObject) {
@@ -67,9 +71,9 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         this.sessionObj.searchListObjectFor("/qListObjectDef", val);
     }
 
-    /** root cell has been resized in grid, this is not the same as window resize */
-    public rootCellResized(): void {
-        console.log("root cell resized and we know it");
+    /** @inheritdoc */
+    public reDraw(): void {
+        this.listView.resize();
     }
 
     /** create session params for generic list */

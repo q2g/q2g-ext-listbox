@@ -13,6 +13,10 @@ import { App } from "../../services/qlik-global-module.factory";
 import { ExtensionComponent } from "../../api/extension.component.interface";
 import { DOCUMENT } from '@angular/platform-browser';
 
+declare module qlik {
+    const e: RootAPI.IRoot;
+}
+
 @Component({
     selector: "q2g-ngx-extension",
     styleUrls: ["./bootstrap.component.scss"],
@@ -54,6 +58,15 @@ export class BootstrapComponent implements AfterViewInit, OnDestroy {
                 attributeFilter: ["style"]
             });
         }
+    }
+
+    /** switched edit / analysis mode */
+    @Input()
+    public set mode(mode: "edit" | "analysis") {
+        if (!this.extension) {
+            return;
+        }
+        this.extension.reDraw();
     }
 
     @ViewChild("extensionRoot", { read: ViewContainerRef })
@@ -100,7 +113,7 @@ export class BootstrapComponent implements AfterViewInit, OnDestroy {
         }
 
         if (this.hasSizeChange()) {
-            this.extension.rootCellResized();
+            this.extension.reDraw();
         }
     }
 
