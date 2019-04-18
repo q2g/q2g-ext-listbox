@@ -15,5 +15,5 @@ export interface ExtensionComponent {
      *
      * @memberof ExtensionComponent
      */
-    reDraw(): void;
+    updateSize(): void;
 }

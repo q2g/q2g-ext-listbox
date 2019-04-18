@@ -66,7 +66,7 @@ export class BootstrapComponent implements AfterViewInit, OnDestroy {
         if (!this.extension) {
             return;
         }
-        this.extension.reDraw();
+        this.extension.updateSize();
     }
 
     @ViewChild("extensionRoot", { read: ViewContainerRef })
@@ -113,7 +113,7 @@ export class BootstrapComponent implements AfterViewInit, OnDestroy {
         }
 
         if (this.hasSizeChange()) {
-            this.extension.reDraw();
+            this.extension.updateSize();
         }
     }
 

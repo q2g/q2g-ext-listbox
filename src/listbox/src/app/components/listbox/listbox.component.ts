@@ -72,8 +72,8 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     }
 
     /** @inheritdoc */
-    public reDraw(): void {
-        this.listView.resize();
+    public updateSize(): void {
+        this.listView.updateSize();
     }
 
     /** create session params for generic list */
