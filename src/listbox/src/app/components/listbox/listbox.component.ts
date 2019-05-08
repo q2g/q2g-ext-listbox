@@ -1,10 +1,10 @@
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, ViewChild } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ExtensionComponent } from "../../api/extension.component.interface";
-import { GenericListSource, ListViewComponent } from "davinci.js";
+import { ListViewComponent } from "davinci.js";
 import { Sort } from "extension/api/porperties.interface";
 import { Subject } from "rxjs";
-import { IListConfig } from 'davinci.js/listview/api/list-config.interface';
 import { ListBoxProperties } from 'src/app/api/properties';
+import { GenericListSource } from '../../model/generic-list.source';
 
 @Component({
     selector: "q2g-listbox",
@@ -17,19 +17,20 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
     private _model: EngineAPI.IGenericObject;
 
-    private sessionObj: EngineAPI.IGenericList;
+    private destroy$: Subject<boolean>;
 
+    @ViewChild(ListViewComponent)
+    private listView: ListViewComponent<any>;
+
+    /** deep clone of object extension properties */
     private properties: EngineAPI.IGenericObjectProperties;
 
-    private destroy$: Subject<boolean>;
+    /** current session object for app */
+    private sessionObj: EngineAPI.IGenericList;
 
     public constructor() {
         this.destroy$ = new Subject();
     }
-
-    @ViewChild(ListViewComponent)
-    /** @todo ignore this */
-    private listView: ListViewComponent<any>;
 
     @Input()
     public set model(model: EngineAPI.IGenericObject) {
@@ -37,9 +38,11 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         this.registerEvents();
     }
 
-    public orientation: "vertical" | "horizontal" = "vertical";
+    /** orientation from list by default this should be vertical */
+    public orientation: ListBoxProperties.Orientation = ListBoxProperties.Orientation.vertical;
 
     public async ngOnInit() {
+
         // create a deep clone from object properties since we resolve a reference
         // if we call this._model.getProperties() again this will change propeties
         this.properties = JSON.parse(JSON.stringify(await this._model.getProperties()));
@@ -47,12 +50,12 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
             this.createSessionProperties()
         );
 
-        const config: IListConfig = {
-            pageSize: 20
-        };
-
-        this.listSource = new GenericListSource(this.sessionObj, config);
-        this.setOrientation();
+        /*
+        const properties = new Properties();
+        properties.cols = 2;
+        */
+        this.listSource = new GenericListSource(this.sessionObj);
+        this.orientation = this.properties.properties.orientation;
     }
 
     /**
@@ -62,18 +65,17 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     public ngOnDestroy() {
         this._model.app.destroySessionObject(this.sessionObj.id);
         this.destroy$.next(true);
-
         this._model = null;
     }
 
-    public onSearch(val) {
-        /** we could pass event through not that bad solution */
-        this.sessionObj.searchListObjectFor("/qListObjectDef", val);
+    /** register on search event */
+    public async onSearch(val): Promise<void> {
+        await this.listView.search(val);
     }
 
     /** @inheritdoc */
     public updateSize(): void {
-        this.listView.updateSize();
+        // this.listView.updateSize();
     }
 
     /** create session params for generic list */
@@ -148,44 +150,51 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     /** check properties have been changed so we have to redraw data could be also placed in bootstrap component */
     private async handleModelChanged() {
 
-        /** get current and new extension properties */
-        const curObjProperties = this.properties;
-        const newObjProperties = await this._model.getProperties();
+        /** get new object properties */
+        const newProperties = await this._model.getProperties();
 
-        /** get current and new properties */
-        const curProperties = curObjProperties.properties;
-        const newProperties = newObjProperties.properties;
+        const requireUpdate        = this.hasOrientationChange(newProperties.properties.orientation);
+        const requireSessionUpdate = this.hasChanges(this.properties, newProperties);
 
-        /** get current and new field definitions */
-        const curFieldDefs: string[] = curObjProperties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs;
-        const newFieldDefs: string[] = newObjProperties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs;
-
-        let noChange = JSON.stringify(newProperties) === JSON.stringify(curProperties);
-            noChange = noChange && newFieldDefs.sort().toString() === curFieldDefs.sort().toString();
-
-        /** @todo skip orientation since this only change the view of data not the data itself */
-
-        /** neither extension properties nor field defs has been changed so we could skip */
-        if (noChange) {
+        if (!requireSessionUpdate && !requireUpdate) {
             return;
         }
 
         /** create new clone from extension properties */
-        this.properties = JSON.parse(JSON.stringify(newObjProperties));
+        this.properties  = JSON.parse(JSON.stringify(newProperties));
+        this.orientation = newProperties.properties.orientation;
 
-        /** create new session properties and update session object */
-        const sessionProperties = await this.createSessionProperties();
-        this.sessionObj.setProperties(sessionProperties);
-        this.setOrientation();
+        if (requireSessionUpdate) {
+            /** create new session properties and update session object */
+            /** this will cause an change event */
+            const sessionProperties = await this.createSessionProperties();
+            this.sessionObj.setProperties(sessionProperties);
+            return;
+        }
     }
 
-    private setOrientation() {
-        switch (this.properties.properties.orientation) {
-            case ListBoxProperties.Orientation.vertical: 
-                this.orientation = "vertical";
-                break;
-            default:
-                this.orientation = "horizontal";
-        }
+    /** check we got changes on properties */
+    private hasChanges(newProperties, curProperties): boolean {
+
+        /** get current and new field definitions */
+        const curFieldDefs: string[] = curProperties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs;
+        const newFieldDefs: string[] = newProperties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs;
+
+        let noChange = true; 
+
+        /** check properties has been changed */
+        noChange = JSON.stringify(newProperties.properties) === JSON.stringify(curProperties.properties);
+
+        /** check field defs has been changed */
+        noChange = noChange && newFieldDefs.sort().toString() === curFieldDefs.sort().toString();
+
+        /** no change if we only change the orientation, this will not update the data only the visualization */
+        noChange = noChange && newProperties.properties.orientation === this.orientation;
+
+        return !noChange;
+    }
+
+    private hasOrientationChange(newOrientation: ListBoxProperties.Orientation): boolean {
+        return this.orientation !== newOrientation;
     }
 }

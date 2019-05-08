@@ -11,29 +11,21 @@ export = {
         export: false,
         exportData: false
     },
-    init: ($root) => {
-    },
     paint: () => {
     },
     resize: () => {},
     controller: ["$scope", "$element", ($scope: any, $element) => {
 
-
-        /** 
-         * if the element dont have an id, create a new unique id
-         * so we could find the element again which is needed to determine 
-         * if grid cell size has been changed and need to rerender some stuff like 
-         * scrollbars or any other elements which depends on dom element size
-         * 
-         * or just press F5
-         */
+        /** create id if component dosent have one */
         const cell: JQuery = $element.closest('.cell').uniqueId();
-
         /** this is the extension id which will be used to get correct app model */
         const id = $scope.layout.qInfo.qId;
-
-        const extEl: JQuery = $element.append(`<q2g-ngx-extension mode=${(test())} object-id=${id} root-cell=${cell.attr('id')} ></q2g-ngx-extension>`);
+        /** current mode visualization / edit */
+        const mode = qlik.navigation.getMode();
+        /** append q2g-ngx-extension wrapper for angular x extensions */
+        const extEl: JQuery = $element.append(`<q2g-ngx-extension mode=${mode} object-id=${id} root-cell=${cell.attr('id')} ></q2g-ngx-extension>`);
         
+        /** watch for changes on mode and pass them to ngx-extension to trigger a rerender */
         $scope.$watch(() => qlik.navigation.getMode(), (cur: string) => {
             window.setTimeout(() => {
                 extEl.find('q2g-ngx-extension').attr("mode", cur);
@@ -41,7 +33,3 @@ export = {
         });
     }]
 };
-
-function test() {
-    return qlik.navigation.getMode()
-}

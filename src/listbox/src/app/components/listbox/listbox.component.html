@@ -1,2 +1,4 @@
-<davinci-search [placeholder]="'foobar'" (changed)="onSearch($event)"></davinci-search>
-<davinci-listview [dataSource]="listSource" [orientation]="orientation"></davinci-listview>
+<davinci-search [placeholder]="'Search'" (changed)="onSearch($event)"></davinci-search>
+
+<!-- we require an item size to know how big an item will be-->
+<davinci-listview [dataSource]="listSource" [orientation]="orientation === 0 ?'vertical':'horizontal'" [itemSize]=30 [cols]=2></davinci-listview>
