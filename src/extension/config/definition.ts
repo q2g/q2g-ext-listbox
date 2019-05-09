@@ -8,13 +8,19 @@ export const definition = {
         dimensions: {
             uses: "dimensions",
             min: 1,
-            max: 2,
             items: {
                 nullSuppression: {
                     show: false
                 },
-                dimensionLimits :{
+                dimensionLimits: {
                     show: false
+                },
+                dimensionMeasure: {
+                    type: "string",
+                    component: "expression",
+                    ref: "qAttributeExpressions.0.qExpression",
+                    label: "Dimension Measure",
+                    defaultValue: ""
                 }
             }
         },

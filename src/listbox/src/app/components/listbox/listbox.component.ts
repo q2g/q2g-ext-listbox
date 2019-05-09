@@ -5,6 +5,7 @@ import { Sort } from "extension/api/porperties.interface";
 import { Subject } from "rxjs";
 import { ListBoxProperties } from 'src/app/api/properties';
 import { GenericListSource } from '../../model/generic-list.source';
+import { TreeListSource } from "../../model/tree-list.source";
 
 @Component({
     selector: "q2g-listbox",
@@ -13,7 +14,7 @@ import { GenericListSource } from '../../model/generic-list.source';
 })
 export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
-    public listSource: GenericListSource;
+    public listSource: GenericListSource | TreeListSource;
 
     private _model: EngineAPI.IGenericObject;
 
@@ -46,15 +47,19 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         // create a deep clone from object properties since we resolve a reference
         // if we call this._model.getProperties() again this will change propeties
         this.properties = JSON.parse(JSON.stringify(await this._model.getProperties()));
-        this.sessionObj = await this._model.app.createSessionObject(
-            this.createSessionProperties()
-        );
 
         /*
         const properties = new Properties();
         properties.cols = 2;
         */
-        this.listSource = new GenericListSource(this.sessionObj);
+
+        if (this.properties.qHyperCubeDef.qDimensions.length > 1) {
+            this.sessionObj = await this._model.app.createSessionObject(this.createSessionTreeProperties());
+            this.listSource = new TreeListSource(this.sessionObj);
+        } else {
+            this.sessionObj = await this._model.app.createSessionObject(this.createSessionProperties());
+            this.listSource = new GenericListSource(this.sessionObj);
+        }
         this.orientation = this.properties.properties.orientation;
     }
 
@@ -76,6 +81,77 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     /** @inheritdoc */
     public updateSize(): void {
         // this.listView.updateSize();
+    }
+
+    /** create session params for generic list */
+    private createSessionTreeProperties(): EngineAPI.IGenericListProperties {
+
+        const dimensionList: {name: string, value: string, measure: string}[] = [];
+
+        for (const dimension of this.properties.qHyperCubeDef.qDimensions as EngineAPI.INxDimension[]) {
+            console.log(dimension);
+            dimensionList.push({
+                name: dimension.qDef.qFieldLabels[0],
+                value: dimension.qDef.qFieldDefs[0],
+                measure: dimension.qAttributeExpressions[0].qExpression
+            });
+        }
+
+        const info: EngineAPI.INxInfo = {
+            qType: "TreeCube",
+            qId: ""
+        };
+
+        let measure = "only({1} if(";
+        let measurePart1 = "";
+        let measurePart2 = "";
+
+        for (const dimension of dimensionList) {
+            measurePart1 += "not isnull([" + dimension.value + "]) or ";
+            measurePart2 += "[" + dimension.value + "]" + "&";
+        }
+
+        measure += measurePart1.slice(0, -3) + ",'O' , 'N' ))&only(if(not isnull(" + measurePart2.slice(0, -1);
+        measure += "),'N', 'O'))";
+
+
+        const dimensions: EngineAPI.INxDimension[] = [];
+        for (const dimension of dimensionList) {
+            const newDimension: any = {
+                qDef: {
+                    qFieldDefs: [
+                        dimension.value
+                    ],
+                    qFieldLabels: [
+                        dimension.name
+                    ]
+                },
+                qAttributeExpressions: [
+                    {
+                        qExpression: dimension.measure
+                    },
+                    {
+                        qExpression: measure
+                    }
+                ]
+            };
+            dimensions.push(newDimension);
+        }
+
+        const listParam: any = {
+            qExtendsId: "",
+            qMetaDef: {},
+            qStateName: "$",
+            qInfo: info,
+            qTreeDataDef: {
+                qAlwaysFullyExpanded: false,
+                qMode: "DATA_MODE_TREE",
+                qStateName: "$",
+                qDimensions: dimensions,
+            }
+        };
+
+        return listParam;
     }
 
     /** create session params for generic list */
@@ -153,7 +229,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         /** get new object properties */
         const newProperties = await this._model.getProperties();
 
-        const requireUpdate        = this.hasOrientationChange(newProperties.properties.orientation);
+        const requireUpdate = this.hasOrientationChange(newProperties.properties.orientation);
         const requireSessionUpdate = this.hasChanges(this.properties, newProperties);
 
         if (!requireSessionUpdate && !requireUpdate) {
@@ -161,7 +237,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         }
 
         /** create new clone from extension properties */
-        this.properties  = JSON.parse(JSON.stringify(newProperties));
+        this.properties = JSON.parse(JSON.stringify(newProperties));
         this.orientation = newProperties.properties.orientation;
 
         if (requireSessionUpdate) {
@@ -180,7 +256,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         const curFieldDefs: string[] = curProperties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs;
         const newFieldDefs: string[] = newProperties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs;
 
-        let noChange = true; 
+        let noChange = true;
 
         /** check properties has been changed */
         noChange = JSON.stringify(newProperties.properties) === JSON.stringify(curProperties.properties);
