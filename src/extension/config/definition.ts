@@ -296,6 +296,12 @@ export const definition = {
                                         return data.properties.horizontalmode;
                                     }
                                 },
+                            },
+                            show: function (data: IDataProperties) {
+                                if (data.qHyperCubeDef.qDimensions.length === 0) {
+                                    return true;
+                                }
+                                return false;
                             }
                         },
                         split: {
@@ -350,8 +356,20 @@ export const definition = {
                                         return data.properties.splitmode;
                                     }
                                 },
+                            },
+                            show: function (data: IDataProperties) {
+                                if (data.qHyperCubeDef.qDimensions.length === 0) {
+                                    return true;
+                                }
+                                return false;
                             }
                         }
+                    },
+                    show: function (data: IDataProperties) {
+                        if (data.qHyperCubeDef.qDimensions.length === 1) {
+                            return true;
+                        }
+                        return false;
                     }
                 }
             }
