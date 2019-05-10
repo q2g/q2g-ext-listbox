@@ -1,4 +1,17 @@
+<ng-template #treeViewItem let-item="item">
+    <span class="colspan{{item.colNumber}}"></span>
+    <i [ngClass]="[item.hasChild ? 'lui-icon lui-icon--minus' : 'lui-icon lui-icon--plus']"
+        (click)="expandCollapseItem(item)"></i>
+    <span *ngIf="item; else empty" (click)="itemClick(item)" class="list-item"
+        [ngClass]="[item && item.state !== 'none' ? item.state : '']">
+        <span class="item-label">{{item.label}}-{{item.colNumber}}</span>
+        <i [ngClass]="[item.icon !== 'none' ? 'lui-icon lui-icon--' + item.icon : '']"></i>
+    </span>
+    <span>{{item.measureValue}}</span>
+</ng-template>
+
 <davinci-search [placeholder]="'Search'" (changed)="onSearch($event)"></davinci-search>
 
 <!-- we require an item size to know how big an item will be-->
-<davinci-listview [dataSource]="listSource" [orientation]="orientation === 0 ?'vertical':'horizontal'" [itemSize]=30 [cols]=1></davinci-listview>
+<davinci-listview [dataSource]="listSource" [orientation]="orientation === 0 ?'vertical':'horizontal'" [itemSize]=30 [cols]=1 [itemTemplate]=treeViewItem>
+</davinci-listview>
