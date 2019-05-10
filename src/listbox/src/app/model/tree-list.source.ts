@@ -7,6 +7,7 @@ interface ITreeLayout extends EngineAPI.IGenericBaseLayout {
 interface ISizeHc {
     height: number;
     width: number;
+    maxWidth: number;
 }
 
 interface IListItemExtended extends IListItem<any> {
@@ -18,6 +19,7 @@ interface IListItemExtended extends IListItem<any> {
     nodeNumber: number;
     parentRowNumber: number;
     measureValue: string;
+    isLast: boolean;
 }
 
 
@@ -81,7 +83,6 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
 
     /** load all items for specific page */
     public async load(start: number, count: number): Promise<IListItem<EngineAPI.INxCell>[]> {
-        console.log("##", start, count);
 
         const nodes = {
             qAllValues: false,
@@ -103,16 +104,18 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
         });
 
         let data: IListItemExtended[] = [];
+
+        // todo: return header on data object
         this.header = [];
 
+        console.log("##### DATA ######", data);
+
         data = this.calcRenderData(rawData[0].qNodes, data, start);
-        console.log("0", data, start, count);
-        data = data.filter((curr, index, arr) => {
-            if (index < start + count) {
-                return curr;
-            }
-        });
-        console.log("1", data);
+        // data = data.filter((curr, index, arr) => {
+        //     if (index < start + count) {
+        //         return curr;
+        //     }
+        // });
 
         return data;
     }
@@ -144,6 +147,7 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
     private calculateSizeOfHc(nodesOnDimension: number[]): ISizeHc {
         let height = 0;
         let width = 0;
+        const maxWidth = nodesOnDimension.length;
         for (const count of nodesOnDimension) {
             if (count > 0) {
                 width++;
@@ -152,13 +156,14 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
         }
         return {
             height,
-            width
+            width,
+            maxWidth
         };
     }
 
     private calcRenderData(data: any, calcData: IListItemExtended[], index: number, parrentRowNumber = -1, colNum = -1): IListItemExtended[] {
 
-        colNum++;
+        const col = colNum + 1;
 
         for (const rawItem of data) {
 
@@ -166,7 +171,7 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
                 hasChild: rawItem.qNodes.length > 0 ? true : false,
                 label: `${rawItem.qText} - ${rawItem.qAttrExps.qValues[1].qText}`,
                 rowNumber: rawItem.qRow,
-                colNumber: colNum,
+                colNumber: col,
                 parentNode: rawItem.qParentNode,
                 elNumber: rawItem.qElemNo,
                 nodeNumber: rawItem.qNodeNr,
@@ -174,7 +179,8 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
                 measureValue: rawItem.qValues[0].qText,
                 raw: rawItem,
                 icon: ItemIcon.NONE,
-                state: ItemState.NONE
+                state: ItemState.NONE,
+                isLast: col === this.sizeHc.maxWidth - 1
             };
 
             if (rawItem.qRow - (rawItem.qNodes.length > 0 ? 1 : 0) < index) {
@@ -182,7 +188,7 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
             }
             calcData.push(subNode);
             if (rawItem.qNodes.length > 0) {
-                calcData = this.calcRenderData(rawItem.qNodes, calcData, rawItem.qRow, colNum);
+                calcData = this.calcRenderData(rawItem.qNodes, calcData, rawItem.qRow, colNum, col);
             }
         }
         return calcData;

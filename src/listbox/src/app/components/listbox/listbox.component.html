@@ -1,18 +1,20 @@
 <ng-template #treeViewItem let-item="item">
 
-    <span class="colspan{{item.colNumber}}"></span>
+    <span class="colspan" [style.padding-left.px]="item.colNumber*15"></span>
 
-    <i [ngClass]="[item.hasChild ? 'lui-icon lui-icon--minus' : 'lui-icon lui-icon--plus']"
+    <i *ngIf="!item.isLast" [ngClass]="[item.hasChild ? 'lui-icon lui-icon--minus' : 'lui-icon lui-icon--plus']"
         (click)="expandCollapseItem(item)">
     </i>
 
     <span *ngIf="item; else empty" (click)="itemClick(item)" class="list-item"
         [ngClass]="[item && item.state !== 'none' ? item.state : '']">
-    <span class="item-label">{{item.label}}-{{item.colNumber}}</span>
-    <i [ngClass]="[item.icon !== 'none' ? 'lui-icon lui-icon--' + item.icon : '']"></i>
+
+        <span class="item-label">{{item.label}} - {{item.hasChild}}</span>
+        <i [ngClass]="[item.icon !== 'none' ? 'lui-icon lui-icon--' + item.icon : '']"></i>
+
     </span>
 
-    <span>{{item.measureValue}}</span>
+    <span class="item--measure">{{item.measureValue}}</span>
 
 </ng-template>
 

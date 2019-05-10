@@ -57,7 +57,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         properties.cols = 2;
         */
 
-        if (this.properties.qHyperCubeDef.qDimensions.length > 1) {
+        if (this.isTreeView()) {
             this.sessionObj = await this._model.app.createSessionObject(this.createSessionTreeProperties());
             this.listSource = new TreeListSource(this.sessionObj);
             this.isTree = true;
@@ -87,6 +87,10 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     /** @inheritdoc */
     public updateSize(): void {
         // this.listView.updateSize();
+    }
+
+    public expandCollapseItem(item) {
+        this.listSource.expandCollapseItem(item);
     }
 
     /** create session params for generic list */
@@ -278,5 +282,13 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
     private hasOrientationChange(newOrientation: ListBoxProperties.Orientation): boolean {
         return this.orientation !== newOrientation;
+    }
+
+    private isTreeView(): boolean {
+        if (this.properties.qHyperCubeDef.qDimensions.length > 1) {
+            return true;
+        }
+        return false;
+        
     }
 }
