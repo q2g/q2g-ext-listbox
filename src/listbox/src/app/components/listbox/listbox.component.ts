@@ -1,6 +1,6 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ViewChild, TemplateRef } from "@angular/core";
 import { ExtensionComponent } from "../../api/extension.component.interface";
-import { ListViewComponent } from "davinci.js";
+import { ListViewComponent, IListItem } from "davinci.js";
 import { Sort } from "extension/api/porperties.interface";
 import { Subject } from "rxjs";
 import { ListBoxProperties } from 'src/app/api/properties';
@@ -16,12 +16,16 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
     public listSource: GenericListSource | TreeListSource;
 
+    public itemTemplate: TemplateRef<IListItem<any>>;
+
     private _model: EngineAPI.IGenericObject;
 
     private destroy$: Subject<boolean>;
 
     @ViewChild(ListViewComponent)
     private listView: ListViewComponent<any>;
+
+    public isTree = false;
 
     /** deep clone of object extension properties */
     private properties: EngineAPI.IGenericObjectProperties;
@@ -56,9 +60,11 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         if (this.properties.qHyperCubeDef.qDimensions.length > 1) {
             this.sessionObj = await this._model.app.createSessionObject(this.createSessionTreeProperties());
             this.listSource = new TreeListSource(this.sessionObj);
+            this.isTree = true;
         } else {
             this.sessionObj = await this._model.app.createSessionObject(this.createSessionProperties());
             this.listSource = new GenericListSource(this.sessionObj);
+            this.isTree = false;
         }
         this.orientation = this.properties.properties.orientation;
     }
