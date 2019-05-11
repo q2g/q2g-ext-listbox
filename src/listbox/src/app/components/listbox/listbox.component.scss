@@ -4,4 +4,32 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
+
+    ::ng-deep {
+        .ngx-customscrollbars:not(.dragged) {
+            opacity: 0;
+            transition: opacity .5s ease-in-out;
+            -moz-transition: opacity .5s ease-in-out;
+            -webkit-transition: opacity .5s ease-in-out;
+
+            .scrollbar-thumb:hover {
+                background: rgba(50, 50, 50, .5);
+            }
+        }
+
+        .ngx-customscrollbars.dragged {
+            opacity: 1;
+            .scrollbar-thumb {
+                background: rgba(50, 50, 50, .5);
+            }
+        }
+    }
+
+    &:hover {
+        ::ng-deep {
+            .ngx-customscrollbars {
+                opacity: 1;
+            }
+        }
+    }
 }
