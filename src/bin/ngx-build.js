@@ -10,7 +10,7 @@ const cliPath = path.resolve(process.cwd(), 'node_modules/@angular/cli/bin/ng');
 const args = [cliPath, "build", "--watch", "--preserve-symlinks"];
 let isCreateBundle = false;
 
-cow.say(` Create bundle for listbox, this can take a while.`);
+cow.say(` Create CustomElement for listbox, this can take a while.`);
 
 /** spawn new process */
 const ngProcess = childProcess.spawn("node", args);
