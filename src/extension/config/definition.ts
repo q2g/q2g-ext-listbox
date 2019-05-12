@@ -271,7 +271,7 @@ export const definition = {
                             grouped: false,
                             items: {
                                 orientation: {
-                                    ref: "properties.orientation",
+                                    ref: "properties.listbox.itemAlign",
                                     label: "switch orientation",
                                     component: "switch",
                                     type: "boolean",
@@ -282,26 +282,20 @@ export const definition = {
                                         value: 1,
                                         label: "horizontal"
                                     }],
-                                    defaultValue: false
+                                    defaultValue: 0
                                 },
                                 fieldSize: {
-                                    ref: "properties.fieldSize",
+                                    ref: "properties.listbox.itemSize",
                                     label: "Field Size",
                                     type: "number",
                                     defaultValue: 80,
                                     show: function (data: IDataProperties) {
-                                        if (!data.properties.horizontalmode) {
-                                            data.properties.fieldSize = 80;
+                                        if (data.properties.listbox.itemAlign === 1) {
+                                            data.properties.listbox.itemSize = 80;
                                         }
-                                        return data.properties.horizontalmode;
+                                        return data.properties.listbox.itemAlign === 1;
                                     }
                                 },
-                            },
-                            show: function (data: IDataProperties) {
-                                if (data.qHyperCubeDef.qDimensions.length === 0) {
-                                    return true;
-                                }
-                                return false;
                             }
                         },
                         split: {
@@ -310,7 +304,7 @@ export const definition = {
                             grouped: false,
                             items: {
                                 splitmode: {
-                                    ref: "properties.splitmode",
+                                    ref: "properties.listbox.splitActive",
                                     label: "switch to split mode",
                                     component: "switch",
                                     type: "boolean",
@@ -324,52 +318,43 @@ export const definition = {
                                     defaultValue: false
                                 },
                                 splitcolumns: {
-                                    ref: "properties.splitcolumns",
+                                    ref: "properties.listbox.splitCols",
                                     label: "how many columns",
                                     type: "number",
                                     defaultValue: 1,
                                     show: function (data: IDataProperties) {
-                                        if (!data.properties.splitmode) {
-                                            data.properties.splitcolumns = 1;
+                                        if (!data.properties.listbox.splitActive) {
+                                            data.properties.listbox.splitCols = 1;
                                         }
-                                        data.properties.splitcolumns = Math.round(data.properties.splitcolumns);
-                                        return data.properties.splitmode;
+                                        data.properties.listbox.splitCols = Math.round(data.properties.listbox.splitCols);
+                                        return data.properties.listbox.splitActive;
                                     }
                                 },
                                 splitorientation: {
-                                    ref: "properties.splitorientation",
+                                    ref: "properties.listbox.splitAlign",
                                     label: "switch betweent the order",
                                     component: "switch",
                                     type: "boolean",
                                     options: [{
-                                        value: true,
-                                        label: "horizontal"
-                                    }, {
-                                        value: false,
+                                        value: 0,
                                         label: "vertical"
+                                    }, {
+                                        value: 1,
+                                        label: "horizontal"
                                     }],
-                                    defaultValue: false,
+                                    defaultValue: 0,
                                     show: function (data: IDataProperties) {
-                                        if (!data.properties.splitmode) {
-                                            data.properties.splitorientation = false;
+                                        if (!data.properties.listbox.splitActive) {
+                                            data.properties.listbox.splitAlign = 0;
                                         }
-                                        return data.properties.splitmode;
+                                        return data.properties.listbox.splitActive;
                                     }
                                 },
-                            },
-                            show: function (data: IDataProperties) {
-                                if (data.qHyperCubeDef.qDimensions.length === 0) {
-                                    return true;
-                                }
-                                return false;
                             }
                         }
                     },
                     show: function (data: IDataProperties) {
-                        if (data.qHyperCubeDef.qDimensions.length === 1) {
-                            return true;
-                        }
-                        return false;
+                        return data.qHyperCubeDef.qDimensions.length < 2;
                     }
                 }
             }

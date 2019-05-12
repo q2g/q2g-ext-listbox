@@ -22,7 +22,6 @@ interface IListItemExtended extends IListItem<any> {
     isLast: boolean;
 }
 
-
 declare type ListItem =
     | IListItem<EngineAPI.INxCell>
     | IListItem<EngineAPI.INxCell>[];

@@ -1,7 +1,18 @@
-export namespace ListBoxProperties {
+export namespace ListBox {
 
-    export enum Orientation {
-        vertical = 0,
-        horizontal = 1
+    export interface IItem {
+        align: number;
+        size: number;
+    }
+
+    export interface ISplit {
+        active: boolean;
+        align: 0 | 1;
+        cols: number;
+    }
+
+    export interface IProperties {
+        item: IItem;
+        split: ISplit;
     }
 }

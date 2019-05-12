@@ -1,294 +1,179 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild, TemplateRef } from "@angular/core";
-import { ExtensionComponent } from "../../api/extension.component.interface";
-import { ListViewComponent, IListItem } from "davinci.js";
-import { Sort } from "extension/api/porperties.interface";
+import { Component, Input, OnDestroy, OnInit, ViewChild, TemplateRef, ChangeDetectionStrategy, ChangeDetectorRef } from "@angular/core";
+import { ListViewComponent, ListSource } from "davinci.js";
 import { Subject } from "rxjs";
-import { ListBoxProperties } from 'src/app/api/properties';
-import { GenericListSource } from '../../model/generic-list.source';
-import { TreeListSource } from "../../model/tree-list.source";
+import { takeUntil, switchMap } from "rxjs/operators";
+import { ExtensionComponent } from "../../api/extension.component.interface";
+import { ExtensionConnector, IExtensionUpdate } from '../../services/extension.connector';
+import { PropertiesModel } from '../../model/properties.model';
+import { SessionPropertiesFactory } from '../../services/session-properties.factory';
+import { TreeListSource } from 'src/app/model/tree-list.source';
+import { GenericListSource } from 'src/app/model/generic-list.source';
+import { ListProperties } from 'src/app/model/list-properties.model';
 
-@Component({
+@Component( {
     selector: "q2g-listbox",
     templateUrl: "listbox.component.html",
-    styleUrls: ["./listbox.component.scss"]
-})
+    styleUrls: ["./listbox.component.scss"],
+    changeDetection: ChangeDetectionStrategy.OnPush
+} )
 export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
-    public listSource: GenericListSource | TreeListSource;
+    public listSource: ListSource<any>;
 
-    public itemTemplate: TemplateRef<IListItem<any>>;
+    public listAlign: "vertical" | "horizontal" = "vertical";
 
-    private _model: EngineAPI.IGenericObject;
+    public splitCols = 1;
 
-    private destroy$: Subject<boolean>;
+    public itemSize = 30;
 
-    @ViewChild(ListViewComponent)
-    private listView: ListViewComponent<any>;
+    public splitAlign: "vertical" | "horizontal" = "vertical";
 
     public isTree = false;
 
-    /** deep clone of object extension properties */
-    private properties: EngineAPI.IGenericObjectProperties;
+    private session: any;
 
-    /** current session object for app */
-    private sessionObj: EngineAPI.IGenericList;
+    private app: EngineAPI.IApp;
 
-    public constructor() {
+    private extensionConnector: ExtensionConnector;
+
+    private destroy$: Subject<boolean>;
+
+    @ViewChild( ListViewComponent )
+    private listView: ListViewComponent<any>;
+
+    public constructor (
+        private sessPropFactory: SessionPropertiesFactory,
+        private changeDetector: ChangeDetectorRef
+    ) {
         this.destroy$ = new Subject();
+        this.extensionConnector = new ExtensionConnector();
     }
 
     @Input()
-    public set model(model: EngineAPI.IGenericObject) {
-        this._model = model;
-        this.registerEvents();
-    }
-
-    /** orientation from list by default this should be vertical */
-    public orientation: ListBoxProperties.Orientation = ListBoxProperties.Orientation.vertical;
-
-    public async ngOnInit() {
-
-        // create a deep clone from object properties since we resolve a reference
-        // if we call this._model.getProperties() again this will change propeties
-        this.properties = JSON.parse(JSON.stringify(await this._model.getProperties()));
-
-        /*
-        const properties = new Properties();
-        properties.cols = 2;
-        */
-
-        if (this.isTreeView()) {
-            this.sessionObj = await this._model.app.createSessionObject(this.createSessionTreeProperties());
-            this.listSource = new TreeListSource(this.sessionObj);
-            this.isTree = true;
-        } else {
-            this.sessionObj = await this._model.app.createSessionObject(this.createSessionProperties());
-            this.listSource = new GenericListSource(this.sessionObj);
-            this.isTree = false;
-        }
-        this.orientation = this.properties.properties.orientation;
+    public set model( model: EngineAPI.IGenericObject ) {
+        this.app = model.app;
+        this.extensionConnector.connect( model );
     }
 
     /**
-     * compent gets destroyed, remove session object and trigger
-     * destroyed to remove event listeners
+     * on initialize watch the extension connector
+     * for new connection or any update
+     */
+    public ngOnInit() {
+
+        this.extensionConnector.connected
+            .pipe(
+                takeUntil( this.destroy$ ),
+                switchMap( ( properties ) => {
+                    this.applyProperties( properties );
+                    return this.extensionConnector.update$
+                } )
+            )
+            .subscribe( ( update: IExtensionUpdate ) => this.handleExtensionUpdate( update ) );
+    }
+
+    /**
+     * destroy component
      */
     public ngOnDestroy() {
-        this._model.app.destroySessionObject(this.sessionObj.id);
-        this.destroy$.next(true);
-        this._model = null;
+        this.extensionConnector.disconnect();
+        this.destroy$.next( true );
     }
 
     /** register on search event */
-    public async onSearch(val): Promise<void> {
-        await this.listView.search(val);
+    public async onSearch( val ): Promise<void> {
+        /** @todo trigger search on source not on view */
+        await this.listView.search( val );
     }
 
     /** @inheritdoc */
     public updateSize(): void {
-        // this.listView.updateSize();
+        /** update list view change */
+        this.listView.resize();
     }
 
-    public expandCollapseItem(item) {
-        this.listSource.expandCollapseItem(item);
+    public expandCollapseItem( item ) {
+        this.listSource.expandCollapseItem( item );
     }
 
-    /** create session params for generic list */
-    private createSessionTreeProperties(): EngineAPI.IGenericListProperties {
-
-        const dimensionList: {name: string, value: string, measure: string}[] = [];
-
-        for (const dimension of this.properties.qHyperCubeDef.qDimensions as EngineAPI.INxDimension[]) {
-            console.log(dimension);
-            dimensionList.push({
-                name: dimension.qDef.qFieldLabels[0],
-                value: dimension.qDef.qFieldDefs[0],
-                measure: dimension.qAttributeExpressions[0].qExpression
-            });
+    private handleExtensionUpdate( update: IExtensionUpdate ) {
+        switch ( update.type ) {
+            case 'view':
+                this.setViewProperties( update.properties.listConfiguration );
+                break;
+            case 'session':
+                this.handleSessionUpdate( update.properties );
+                break;
+            default:
+                this.handleSourceUpdate( update.properties );
         }
 
-        const info: EngineAPI.INxInfo = {
-            qType: "TreeCube",
-            qId: ""
-        };
-
-        let measure = "only({1} if(";
-        let measurePart1 = "";
-        let measurePart2 = "";
-
-        for (const dimension of dimensionList) {
-            measurePart1 += "not isnull([" + dimension.value + "]) or ";
-            measurePart2 += "[" + dimension.value + "]" + "&";
-        }
-
-        measure += measurePart1.slice(0, -3) + ",'O' , 'N' ))&only(if(not isnull(" + measurePart2.slice(0, -1);
-        measure += "),'N', 'O'))";
-
-
-        const dimensions: EngineAPI.INxDimension[] = [];
-        for (const dimension of dimensionList) {
-            const newDimension: any = {
-                qDef: {
-                    qFieldDefs: [
-                        dimension.value
-                    ],
-                    qFieldLabels: [
-                        dimension.name
-                    ]
-                },
-                qAttributeExpressions: [
-                    {
-                        qExpression: dimension.measure
-                    },
-                    {
-                        qExpression: measure
-                    }
-                ]
-            };
-            dimensions.push(newDimension);
-        }
-
-        const listParam: any = {
-            qExtendsId: "",
-            qMetaDef: {},
-            qStateName: "$",
-            qInfo: info,
-            qTreeDataDef: {
-                qAlwaysFullyExpanded: false,
-                qMode: "DATA_MODE_TREE",
-                qStateName: "$",
-                qDimensions: dimensions,
-            }
-        };
-
-        return listParam;
+        /** 
+         * this is black magic, but we have to do this otherwise 
+         * our properties will not change ... and i dont know why
+         */
+        this.changeDetector.detectChanges();
+        this.listView.reload();
     }
 
-    /** create session params for generic list */
-    private createSessionProperties(): EngineAPI.IGenericListProperties {
-        const listParam: EngineAPI.IGenericListProperties = {
-            qInfo: { qType: "ListObject" },
-            qListObjectDef: {
-                qStateName: "$",
-                qAutoSortByState: {
-                    qDisplayNumberOfRows: -1
-                },
-                qLibraryId: this.properties.qHyperCubeDef.qDimensions[0].qDef.qLibraryId,
-                qDef: {
-                    qFieldDefs: this.properties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs,
-                    qSortCriterias: [
-                        this.createSortCriterias(this.properties.properties.sort.by)
-                    ] as any
-                },
-                qFrequencyMode: "NX_FREQUENCY_NONE",
-                qInitialDataFetch: [
-                    {
-                        qHeight: 0,
-                        qLeft: 0,
-                        qTop: 0,
-                        qWidth: 0
-                    }
-                ],
-                qShowAlternatives: true
-            }
-        };
-        return listParam;
+    private handleSourceUpdate(properties: PropertiesModel) {
+        this.listSource.disconnect();
+        this.applyProperties(properties);
     }
 
-    /** create sort direction definitions */
-    private createSortCriterias(criterias: Sort.Criterias): EngineAPI.ISortCriteria {
-        const p: EngineAPI.ISortCriteria = {
-            qSortByAscii: this.getSortDirection(criterias.ascii) as any,
-            qSortByExpression: this.getSortDirection(
-                criterias.expression
-            ) as any,
-            qSortByFrequency: this.getSortDirection(criterias.frequency) as any,
-            qSortByLoadOrder: this.getSortDirection(criterias.loadOrder) as any,
-            qSortByNumeric: this.getSortDirection(criterias.numeric) as any,
-            qSortByState: this.getSortDirection(criterias.state) as any
-        };
-        p.qExpression = criterias.expression.value;
-        return p;
+    private handleSessionUpdate( properties: PropertiesModel ) {
+        const sessionConfig = properties.dimension.length > 1
+            ? this.sessPropFactory.createTreeProperties( properties )
+            : this.sessPropFactory.createGenericList( properties )
+
+        this.session.setProperties(sessionConfig);
     }
 
-    /** get current sort direction for field */
-    private getSortDirection(field: Sort.Field<EngineAPI.TypeSortDirection | EngineAPI.IValueExpr>): number {
-        if (!field.enabled) {
-            return 0;
-        }
-        return field.orderBy === "a" ? 1 : -1;
-    }
+    /** set view properties */
+    private setViewProperties(properties: ListProperties) {
 
-    /** register to changed event on model */
-    private registerEvents() {
-        /** save eventhandle fn since we need it to unsubscribe */
-        const handler = this.handleModelChanged.bind(this);
-
-        /** register event handle on model changed event */
-        this._model.on("changed", handler);
-
-        /** register to unsubscribe so we can remove changed event handler to avoid memory leaks */
-        this.destroy$.subscribe(() =>
-            (this._model as any).removeListener("changed", handler)
-        );
-    }
-
-    /** check properties have been changed so we have to redraw data could be also placed in bootstrap component */
-    private async handleModelChanged() {
-
-        /** get new object properties */
-        const newProperties = await this._model.getProperties();
-
-        const requireUpdate = this.hasOrientationChange(newProperties.properties.orientation);
-        const requireSessionUpdate = this.hasChanges(this.properties, newProperties);
-
-        if (!requireSessionUpdate && !requireUpdate) {
-            return;
-        }
-
-        /** create new clone from extension properties */
-        this.properties = JSON.parse(JSON.stringify(newProperties));
-        this.orientation = newProperties.properties.orientation;
-
-        if (requireSessionUpdate) {
-            /** create new session properties and update session object */
-            /** this will cause an change event */
-            const sessionProperties = await this.createSessionProperties();
-            this.sessionObj.setProperties(sessionProperties);
-            return;
+        if (this.isTree) {
+            this.listAlign = "vertical";
+            this.itemSize  = 30;
+            this.splitAlign = "vertical";
+            this.splitCols = 1;
+        } else {
+            this.listAlign = properties.itemAlign;
+            this.itemSize = properties.itemAlign === "horizontal" ? properties.itemSize : 30;
+            this.splitAlign = properties.splitActive ? properties.splitAlign : "vertical";
+            this.splitCols = properties.splitActive ? properties.splitCols : 1;
         }
     }
 
-    /** check we got changes on properties */
-    private hasChanges(newProperties, curProperties): boolean {
-
-        /** get current and new field definitions */
-        const curFieldDefs: string[] = curProperties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs;
-        const newFieldDefs: string[] = newProperties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs;
-
-        let noChange = true;
-
-        /** check properties has been changed */
-        noChange = JSON.stringify(newProperties.properties) === JSON.stringify(curProperties.properties);
-
-        /** check field defs has been changed */
-        noChange = noChange && newFieldDefs.sort().toString() === curFieldDefs.sort().toString();
-
-        /** no change if we only change the orientation, this will not update the data only the visualization */
-        noChange = noChange && newProperties.properties.orientation === this.orientation;
-
-        return !noChange;
+    /** 
+     * read out properties from extension propertie model
+     * and pass it to view
+     */
+    private async applyProperties( properties: PropertiesModel ) {
+        this.isTree = properties.dimension.length > 1;
+        this.listSource = await this.createSource(properties);
+        this.setViewProperties(properties.listConfiguration);
+        this.changeDetector.detectChanges();
     }
 
-    private hasOrientationChange(newOrientation: ListBoxProperties.Orientation): boolean {
-        return this.orientation !== newOrientation;
-    }
+    /**
+     * create source for listview
+     */
+    private async createSource( properties: PropertiesModel ): Promise<ListSource<any>> {
 
-    private isTreeView(): boolean {
-        if (this.properties.qHyperCubeDef.qDimensions.length > 1) {
-            return true;
+        let sessionConfig;
+        let listSource;
+
+        if ( properties.dimension.length > 1 ) {
+            sessionConfig = this.sessPropFactory.createTreeProperties( properties );
+            this.session = await this.app.createSessionObject( sessionConfig );
+            listSource = new TreeListSource( this.session );
+        } else {
+            sessionConfig = this.sessPropFactory.createGenericList( properties );
+            this.session = await this.app.createSessionObject( sessionConfig );
+            listSource = new GenericListSource( this.session );
         }
-        return false;
-        
+
+        return listSource;
     }
 }

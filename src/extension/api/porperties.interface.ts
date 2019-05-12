@@ -1,7 +1,7 @@
 export namespace Sort {
 
     export enum Mode {
-        AUTOMATIC  = 1,
+        AUTOMATIC = 1,
         INDIVIDUAL = 0
     }
 
@@ -23,14 +23,18 @@ export namespace Sort {
     }
 }
 
+export interface IListboxProperties {
+    itemAlign: number;
+    itemSize: number;
+    splitActive: boolean;
+    splitAlign: 0 | 1;
+    splitCols: number;
+}
+
 export interface IProperties {
     sort: {
         by: Sort.Criterias,
         mode: Sort.Mode
     },
-    horizontalmode: boolean;
-    splitcolumns: number;
-    fieldSize: number;
-    splitmode: boolean;
-    splitorientation: boolean;
+    listbox: IListboxProperties
 }

@@ -6,6 +6,7 @@ declare type ListItem =
 
 /** only possible to make it free from listsource is to use a decorator */
 export class GenericListSource extends ListSource<EngineAPI.INxCell> {
+
     /**
      * Creates an instance of GenericListSource.
      */
@@ -45,7 +46,6 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
      */
     public async search(value: string): Promise<boolean> {
         const search = await this.genericList.searchListObjectFor("/qListObjectDef", value);
-
         if (!search) {
             return search;
         }
@@ -124,7 +124,7 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
     /**
      * get icon for state
      */
-    private getIcon( state: EngineAPI.NxCellStateType ): ItemIcon {
+    private getIcon(state: EngineAPI.NxCellStateType): ItemIcon {
         switch ( state ) {
             case SelectionState.EXCLUDED_SELECTED:
             case SelectionState.SELECTED:
@@ -142,7 +142,7 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
     /**
      * get state for item
      */
-    private getState( state: EngineAPI.NxCellStateType ): ItemState {
+    private getState(state: EngineAPI.NxCellStateType): ItemState {
         switch ( state ) {
 
             case SelectionState.EXCLUDED_LOCKED:

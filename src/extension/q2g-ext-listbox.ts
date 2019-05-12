@@ -11,9 +11,6 @@ export = {
         export: false,
         exportData: false
     },
-    paint: () => {
-    },
-    resize: () => {},
     controller: ["$scope", "$element", ($scope: any, $element) => {
 
         /** create id if component dosent have one */
@@ -23,7 +20,7 @@ export = {
         /** current mode visualization / edit */
         const mode = qlik.navigation.getMode();
         /** append q2g-ngx-extension wrapper for angular x extensions */
-        const extEl: JQuery = $element.append(`<q2g-ngx-extension mode=${mode} object-id=${id} root-cell=${cell.attr('id')} ></q2g-ngx-extension>`);
+        const extEl: JQuery = $element.append(`<q2g-ngx-extension mode=${mode} object-id=${id} root-cell=${cell.attr('id')}></q2g-ngx-extension>`);
         
         /** watch for changes on mode and pass them to ngx-extension to trigger a rerender */
         $scope.$watch(() => qlik.navigation.getMode(), (cur: string) => {

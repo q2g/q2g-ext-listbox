@@ -45,7 +45,8 @@ export class BootstrapComponent implements AfterViewInit, OnDestroy {
 
     /**
      * set rootCell id, if one is given attach mutation observer 
-     * to get notified style has been changed
+     * to get notified style has been changed this only works
+     * if style propertie is updated in dom not in css file
      */
     @Input()
     public set rootCell(id: string) {
