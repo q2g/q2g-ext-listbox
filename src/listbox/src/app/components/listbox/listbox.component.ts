@@ -20,6 +20,10 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
     public listSource: ListSource<any>;
 
+    public listSource2: ListSource<any>;
+
+    public inSearch = false;
+
     public listAlign: "vertical" | "horizontal" = "vertical";
 
     public splitCols = 1;
@@ -83,6 +87,8 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     /** register on search event */
     public async onSearch( val ): Promise<void> {
         /** @todo trigger search on source not on view */
+        this.inSearch = true;
+        this.isTree = false;
         await this.listView.search( val );
     }
 
@@ -167,7 +173,12 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         if ( properties.dimension.length > 1 ) {
             sessionConfig = this.sessPropFactory.createTreeProperties( properties );
             this.session = await this.app.createSessionObject( sessionConfig );
+
+            const sessionConfigListSource = this.sessPropFactory.createGenericList( properties )
+            const listSourceExtended = await this.app.createSessionObject( sessionConfigListSource );
+
             listSource = new TreeListSource( this.session );
+            this.listSource2 = new GenericListSource( listSourceExtended );
         } else {
             sessionConfig = this.sessPropFactory.createGenericList( properties );
             this.session = await this.app.createSessionObject( sessionConfig );

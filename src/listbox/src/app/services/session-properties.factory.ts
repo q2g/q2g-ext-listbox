@@ -2,11 +2,27 @@ import { PropertiesModel } from '../model/properties.model';
 import { Sort } from 'extension/api/porperties.interface';
 import { Injectable } from '@angular/core';
 
-@Injectable({providedIn: "root"})
+@Injectable({ providedIn: "root" })
 export class SessionPropertiesFactory {
 
     /** create session params for generic list */
     public createGenericList(properties: PropertiesModel): EngineAPI.IGenericListProperties {
+
+        var subObjFieldDefs = "";
+
+        if (properties.dimension.length > 1) {
+            for (const dimension of properties.dimension) {
+                subObjFieldDefs = subObjFieldDefs + "& '\uFEFF' &[" + dimension.qDef.qFieldDefs[0].replace("=", "") + "]";
+            }
+            for (const dimension of properties.dimension) {
+                subObjFieldDefs = subObjFieldDefs + ', [' + dimension.qDef.qFieldDefs[0].replace("=", "") + "]";
+            }
+            subObjFieldDefs = subObjFieldDefs.substr(7);
+            subObjFieldDefs = "=aggr(" + subObjFieldDefs + ")";
+        } else {
+            subObjFieldDefs = properties.dimension[0].qDef.qFieldDefs[0]
+        }
+
         const listParam: EngineAPI.IGenericListProperties = {
             qInfo: { qType: "ListObject" },
             qListObjectDef: {
@@ -16,7 +32,7 @@ export class SessionPropertiesFactory {
                 },
                 qLibraryId: (properties.dimension[0].qDef as any).qLibraryId,
                 qDef: {
-                    qFieldDefs: properties.dimension[0].qDef.qFieldDefs,
+                    qFieldDefs: [subObjFieldDefs],
                     qSortCriterias: [
                         this.createSortCriterias(properties.sorting)
                     ] as any
@@ -39,7 +55,7 @@ export class SessionPropertiesFactory {
     /** create session params for generic list */
     public createTreeProperties(properties: PropertiesModel): EngineAPI.IGenericListProperties {
 
-        const dimensionList: {name: string, value: string, measure: string}[] = [];
+        const dimensionList: { name: string, value: string, measure: string }[] = [];
 
         for (const dimension of properties.dimension) {
             dimensionList.push({

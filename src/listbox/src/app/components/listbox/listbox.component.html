@@ -15,6 +15,6 @@
 <davinci-search [placeholder]="'Search'" (changed)="onSearch($event)"></davinci-search>
 
 <!-- we require an item size to know how big an item will be-->
-<davinci-listview [dataSource]="listSource" [listAlign]="listAlign"
+<davinci-listview [dataSource]="inSearch?listSource2:listSource" [listAlign]="listAlign"
     [splitAlign]="splitAlign" [itemSize]="itemSize" [cols]="splitCols" [itemTemplate]="isTree ? treeViewItem : null">
 </davinci-listview>
