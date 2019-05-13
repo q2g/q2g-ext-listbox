@@ -30,6 +30,7 @@ declare type ListItem =
 export class TreeListSource extends ListSource<EngineAPI.INxCell> {
 
     private sizeHc: ISizeHc;
+    private expandCounter = 0;
     public header: IListItemExtended[] = [];
 
     /**
@@ -107,11 +108,6 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
         this.header = [];
 
         data = this.calcRenderData(rawData[0].qNodes, data, start);
-        // data = data.filter((curr, index, arr) => {
-        //     if (index < start + count) {
-        //         return curr;
-        //     }
-        // });
 
         return data;
     }
@@ -147,8 +143,8 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
         for (const count of nodesOnDimension) {
             if (count > 0) {
                 width++;
+                height = count + this.expandCounter;
             }
-            height += count;
         }
         return {
             height,
@@ -192,8 +188,10 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
 
     public async expandCollapseItem(item: IListItemExtended) {
         if (item.hasChild) {
+            this.expandCounter--;
             await this.treeList.collapseLeft("/qTreeDataDef", item.rowNumber, item.colNumber, false);
         } else {
+            this.expandCounter++;
             await this.treeList.expandLeft("/qTreeDataDef", item.rowNumber, item.colNumber, false);
         }
     }
