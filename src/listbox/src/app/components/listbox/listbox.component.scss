@@ -4,13 +4,14 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
-    
+
     .item--measure {
         flex: 1;
         text-align: right;
         padding-right: 10px;
     }
 
+    /** scrollbars */
     ::ng-deep {
         .ngx-customscrollbars:not(.dragged) {
             opacity: 0;
@@ -25,6 +26,7 @@
 
         .ngx-customscrollbars.dragged {
             opacity: 1;
+
             .scrollbar-thumb {
                 background: rgba(50, 50, 50, .5);
             }
@@ -38,5 +40,50 @@
             }
         }
     }
-}
 
+    /** list items */
+    ::ng-deep {
+
+        .davinci-listview {
+
+            .lui-list__item {
+                /** @todo move to davinci list view so we could avoid important */
+                border-width: 0 !important;
+                padding: 0 !important;
+            }
+
+            .lui-list__item .item-label {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .lui-list__item .list-item {
+                box-sizing: border-box;
+                padding: 0 5px;
+                border-style: solid;
+                border-color: #D9D9D9;
+
+                &.selected,
+                &.alternative {
+                    border-color: #FFF;
+                }
+            }
+
+            &.vertical {
+                .lui-list__item .list-item {
+                    border-width: 0 0 1px;
+                }
+            }
+
+            &.horizontal {
+
+                .lui-list__item .list-item {
+                    width: 80px;
+                    flex: 0 0 80px; /* so what ? */
+                    border-width: 0 1px 0 0;
+                }
+            }
+        }
+    }
+}
