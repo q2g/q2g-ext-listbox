@@ -63,7 +63,6 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
         const data = await this.treeList.getLayout() as any;
         
         this.sizeHc = this.calculateSizeOfHc((data.qTreeData as any).qNodesOnDim);
-        console.log("data", data);
         this.dataModel.total = this.sizeHc.height;
     }
 
@@ -106,8 +105,6 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
 
         // todo: return header on data object
         this.header = [];
-
-        console.log("##### DATA ######", data);
 
         data = this.calcRenderData(rawData[0].qNodes, data, start);
         // data = data.filter((curr, index, arr) => {
