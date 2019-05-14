@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild, TemplateRef, ChangeDetectionStrategy, ChangeDetectorRef } from "@angular/core";
-import { ListViewComponent, ListSource } from "davinci.js";
+import { ListViewComponent, ListSource, IListItem } from "davinci.js";
 import { Subject } from "rxjs";
 import { takeUntil, switchMap } from "rxjs/operators";
 import { ExtensionComponent } from "../../api/extension.component.interface";
@@ -186,5 +186,35 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         }
 
         return listSource;
+    }
+
+    public accept() {
+        if (this.inSearch) {
+            if (this.listSource2) {
+                this.listSource2.acceptListObjectSearch();
+            } else {
+                this.listSource.acceptListObjectSearch();
+            }
+            this.inSearch = false;
+            this.isTree = true;
+            return;
+        }
+    }
+
+    public cancel() {
+        if(this.inSearch) {
+            if (this.listSource2) {
+                this.listSource2.abortListObjectSearch();
+            } else {
+                this.listSource.abortListObjectSearch();
+            }
+            this.inSearch = false;
+            this.isTree = true;
+            return;
+        }
+    }
+
+    public itemClick(item: IListItem<any>) {
+        this.listSource.select(item);
     }
 }

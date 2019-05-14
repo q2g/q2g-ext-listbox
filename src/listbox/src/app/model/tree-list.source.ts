@@ -20,6 +20,7 @@ interface IListItemExtended extends IListItem<any> {
     parentRowNumber: number;
     measureValue: string;
     isLast: boolean;
+    selectionState: string;
 }
 
 declare type ListItem =
@@ -52,7 +53,9 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
     /**
      * select one or multiple items on listobject
      */
-    public select(item: ListItem) {
+    public select(item: IListItemExtended) {
+        console.log("ITEM", item)
+        this.treeList.selectHyperCubeValues("/qTreeDataDef", item.colNumber , [item.elNumber], false);
     }
 
     /**
@@ -62,7 +65,7 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
     public async connect() {
         super.connect();
         const data = await this.treeList.getLayout() as any;
-        
+
         this.sizeHc = this.calculateSizeOfHc((data.qTreeData as any).qNodesOnDim);
         this.dataModel.total = this.sizeHc.height;
     }
@@ -77,11 +80,13 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
     /**
      * toggle selection on selected values
      */
-    private toggleSelection(item: ListItem) {
+    private toggleSelection(item: IListItemExtended) {
     }
 
     /** load all items for specific page */
     public async load(start: number, count: number): Promise<IListItem<EngineAPI.INxCell>[]> {
+
+        start = start < 0 ? 0 : start;
 
         const nodes = {
             qAllValues: false,
@@ -92,7 +97,7 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
                 qWidth: this.sizeHc.width
             }
         };
-    
+
         const rawData: any[] = await (this.treeList as any).getHyperCubeTreeData("/qTreeDataDef", {
             qMaxNbrOfNodes: 10000,
             qTreeLevels: {
@@ -108,6 +113,8 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
         this.header = [];
 
         data = this.calcRenderData(rawData[0].qNodes, data, start);
+
+        console.log("DATA", data);
 
         return data;
     }
@@ -125,14 +132,14 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
     /**
      * get icon for state
      */
-    private getIcon( state: EngineAPI.NxCellStateType ): ItemIcon {
+    private getIcon(state: EngineAPI.NxCellStateType): ItemIcon {
         return
     }
 
     /**
      * get state for item
      */
-    private getState( state: EngineAPI.NxCellStateType ): ItemState {
+    private getState(state: EngineAPI.NxCellStateType): ItemState {
         return;
     }
 
@@ -161,7 +168,7 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
 
             const subNode: IListItemExtended = {
                 hasChild: rawItem.qNodes.length > 0 ? true : false,
-                label: `${rawItem.qText} - ${rawItem.qAttrExps.qValues[1].qText}`,
+                label: rawItem.qText,
                 rowNumber: rawItem.qRow,
                 colNumber: col,
                 parentNode: rawItem.qParentNode,
@@ -172,6 +179,7 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
                 raw: rawItem,
                 icon: ItemIcon.NONE,
                 state: ItemState.NONE,
+                selectionState: rawItem.qAttrExps.qValues[1].qText,
                 isLast: col === this.sizeHc.maxWidth - 1
             };
 
