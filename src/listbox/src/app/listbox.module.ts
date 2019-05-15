@@ -8,6 +8,7 @@ import { NgxCustomScrollbarModule } from "ngx-customscrollbar";
 import { ListboxComponent } from "./components/listbox/listbox.component";
 import { BootstrapComponent } from "./components/bootstrap/bootstrap.component";
 import { SearchModule, ListViewModule } from "davinci.js";
+import { IconModule, ResponsiveMenuModule } from "davinci.js";
 
 @NgModule({
     imports: [
@@ -15,7 +16,9 @@ import { SearchModule, ListViewModule } from "davinci.js";
         ScrollingModule,
         NgxCustomScrollbarModule,
         ListViewModule,
-        SearchModule
+        SearchModule,
+        IconModule,
+        ResponsiveMenuModule
     ],
     exports: [],
     declarations: [BootstrapComponent, ListboxComponent],

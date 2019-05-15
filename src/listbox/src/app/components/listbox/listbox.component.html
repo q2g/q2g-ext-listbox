@@ -1,20 +1,32 @@
 <ng-template #treeViewItem let-item="item">
-    <span class="colspan" [style.padding-left.px]="item.colNumber*15"></span>
-    <i *ngIf="!item.isLast" [ngClass]="[item.hasChild ? 'lui-icon lui-icon--minus' : 'lui-icon lui-icon--plus']"
-        (click)="expandCollapseItem(item)">
-    </i>
-    <span *ngIf="item; else empty" (click)="itemClick(item)" class="list-item"
-        [ngClass]="[item && item.state !== 'none' ? item.state : '']">
+    <div class="baseContainerRow" ngClass="selectionState-{{item.selectionState}}">
+        <span class="colspan" [style.padding-left.px]="item.colNumber*15"></span>
+        <i class="expandIcon" *ngIf="!item.isLast"
+            [ngClass]="[item.hasChild ? 'lui-icon lui-icon--minus' : 'lui-icon lui-icon--plus']"
+            (click)="expandCollapseItem(item)">
+        </i>
+        <span *ngIf="item; else empty" (click)="itemClick(item)" class="list-item"
+            [ngClass]="[item && item.state !== 'none' ? item.state : '']">
 
-        <span class="item-label">{{item.label}} - {{item.hasChild}}</span>
-        <i [ngClass]="[item.icon !== 'none' ? 'lui-icon lui-icon--' + item.icon : '']"></i>
-    </span>
-    <span class="item--measure">{{item.measureValue}}</span>
+            <span class="item-label">{{item.label}}</span>
+            <i [ngClass]="[item.icon !== 'none' ? 'lui-icon lui-icon--' + item.icon : '']"></i>
+        </span>
+        <span class="item--measure">{{item.measureValue!=="-"?item.measureValue:""}}</span>
+    </div>
 </ng-template>
 
-<davinci-search [placeholder]="'Search'" (changed)="onSearch($event)"></davinci-search>
+<div class="extensionHeader">
+    <davinci-search [placeholder]="'Search'" (changed)="onSearch($event)"></davinci-search>
+    <davinci-responsive-menu>
+        <davinci-icon class="buttonIcon" buttonType="danger" icon="close" [isActive]="inSearch" (click)="cancel()">
+        </davinci-icon>
+        <davinci-icon class="buttonIcon" buttonType="success" [isActive]="inSearch" lable="{{inSearch}}"
+            (click)="accept()"></davinci-icon>
+    </davinci-responsive-menu>
+</div>
+
 
 <!-- we require an item size to know how big an item will be-->
-<davinci-listview [dataSource]="listSource" [listAlign]="listAlign"
-    [splitAlign]="splitAlign" [itemSize]="itemSize" [cols]="splitCols" [itemTemplate]="isTree ? treeViewItem : null">
+<davinci-listview [dataSource]="inSearch?listSource2:listSource" [listAlign]="listAlign" [splitAlign]="splitAlign"
+    [itemSize]="itemSize" [cols]="splitCols" [itemTemplate]="isTree ? treeViewItem : null">
 </davinci-listview>

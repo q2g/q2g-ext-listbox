@@ -162,4 +162,19 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
                 return ItemState.NONE;
         }
     }
+
+    public acceptListObjectSearch() {
+        console.log("acceptListObjectSearch");
+        this.genericList.acceptListObjectSearch("/qListObjectDef", true);
+    }
+
+    public abortListObjectSearch() {
+        console.log("abortListObjectSearch");
+        this.genericList.abortListObjectSearch("/qListObjectDef");
+    }
+
 }
+
+
+// ToDo
+// bread crum in search
