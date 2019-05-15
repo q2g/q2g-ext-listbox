@@ -64,10 +64,10 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         this.extensionConnector.connected
             .pipe(
                 takeUntil( this.destroy$ ),
-                switchMap( ( properties ) => {
+                switchMap((properties) => {
                     this.applyProperties( properties );
                     return this.extensionConnector.update$
-                } )
+                })
             )
             .subscribe( ( update: IExtensionUpdate ) => this.handleExtensionUpdate( update ) );
     }

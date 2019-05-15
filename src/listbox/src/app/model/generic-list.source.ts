@@ -73,6 +73,7 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
 
     /** load all items for specific page */
     public async load(start: number, count: number): Promise<IListItem<EngineAPI.INxCell>[]> {
+        console.log("LOAD DATA");
         const data = await this.genericList.getListObjectData(
             "/qListObjectDef",
             [
