@@ -1,11 +1,14 @@
-import { IListItem, ListSource, ItemIcon, ItemState, SelectionState } from 'davinci.js';
+import { IListItem, ItemIcon, ItemState, SelectionState } from 'davinci.js';
+import { HypercubeListSource } from './hypercube-list.source';
 
 declare type ListItem =
     | IListItem<EngineAPI.INxCell>
     | IListItem<EngineAPI.INxCell>[];
 
 /** only possible to make it free from listsource is to use a decorator */
-export class GenericListSource extends ListSource<EngineAPI.INxCell> {
+export class GenericListSource extends HypercubeListSource<EngineAPI.INxCell> {
+
+    private isSelectionActive: boolean = false;
 
     /**
      * Creates an instance of GenericListSource.
@@ -18,17 +21,25 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
     }
 
     /**
-     * deselect one or multiple items on hypercube
-     */
-    public deselect(item: ListItem) {
-        this.toggleSelection( item );
-    }
-
-    /**
      * select one or multiple items on listobject
      */
-    public select(item: ListItem) {
-        this.toggleSelection( item );
+    public async select(item: IListItem<EngineAPI.INxCell>): Promise<void> {
+
+        if (!this.isSelectionActive) {
+            await this.genericList.beginSelections(["/qListObjectDef"]);
+            this.isSelectionActive = true;
+        }
+
+        const items: IListItem<EngineAPI.INxCell>[] = Array.isArray(item) ? item : [item];
+        const selected = items.map( cell => cell.raw.qElemNumber );
+
+        // at some point we need to call end selections
+        this.genericList.selectListObjectValues(
+            "/qListObjectDef",
+            selected,
+            true,
+            false
+        );
     }
 
     /**
@@ -53,27 +64,8 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
         return true;
     }
 
-    /**
-     * toggle selection on selected values
-     */
-    private toggleSelection(item: ListItem) {
-        const items: IListItem<EngineAPI.INxCell>[] = Array.isArray(item) ? item : [item];
-        const selected = items.map( cell => cell.raw.qElemNumber );
-
-        // at some point we need to call end selections
-        // this.genericList.beginSelections(["/qListObjectDef"]);
-
-        this.genericList.selectListObjectValues(
-            "/qListObjectDef",
-            selected,
-            true,
-            false
-        );
-    }
-
     /** load all items for specific page */
     public async load(start: number, count: number): Promise<IListItem<EngineAPI.INxCell>[]> {
-        console.log("LOAD DATA");
         const data = await this.genericList.getListObjectData(
             "/qListObjectDef",
             [
@@ -87,6 +79,18 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
         );
         return this.convertDataPage(data);
     }
+
+    public async cancelSelection(): Promise<void> {
+        await this.genericList.endSelections(false);
+        this.isSelectionActive = false;
+    }
+
+    public async acceptSelection(): Promise<void> {
+        await this.genericList.endSelections(true);
+        this.isSelectionActive = false;
+    }
+
+    public reverseSelection() { /** @todo implement */}
 
     /** flatten matrix to resolve a list we could display */
     private convertDataPage(data: EngineAPI.INxDataPage[]): IListItem<EngineAPI.INxCell>[] {
@@ -164,17 +168,14 @@ export class GenericListSource extends ListSource<EngineAPI.INxCell> {
     }
 
     public acceptListObjectSearch() {
-        console.log("acceptListObjectSearch");
         this.genericList.acceptListObjectSearch("/qListObjectDef", true);
     }
 
     public abortListObjectSearch() {
-        console.log("abortListObjectSearch");
         this.genericList.abortListObjectSearch("/qListObjectDef");
     }
 
 }
-
 
 // ToDo
 // bread crum in search

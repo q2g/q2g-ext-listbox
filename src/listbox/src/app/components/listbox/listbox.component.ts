@@ -1,5 +1,5 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild, TemplateRef, ChangeDetectionStrategy, ChangeDetectorRef } from "@angular/core";
-import { ListViewComponent, ListSource, IListItem } from "davinci.js";
+import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from "@angular/core";
+import { ListViewComponent, IListItem } from "davinci.js";
 import { Subject } from "rxjs";
 import { takeUntil, switchMap } from "rxjs/operators";
 import { ExtensionComponent } from "../../api/extension.component.interface";
@@ -9,6 +9,7 @@ import { SessionPropertiesFactory } from '../../services/session-properties.fact
 import { TreeListSource } from 'src/app/model/tree-list.source';
 import { GenericListSource } from 'src/app/model/generic-list.source';
 import { ListProperties } from 'src/app/model/list-properties.model';
+import { HypercubeListSource } from 'src/app/model/hypercube-list.source';
 
 @Component( {
     selector: "q2g-listbox",
@@ -18,9 +19,9 @@ import { ListProperties } from 'src/app/model/list-properties.model';
 } )
 export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
-    public listSource: ListSource<any>;
+    public listSource: HypercubeListSource<EngineAPI.INxCell>;
 
-    public listSource2: ListSource<any>;
+    public listSource2: HypercubeListSource<EngineAPI.INxCell>;
 
     public inSearch = false;
 
@@ -64,7 +65,6 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
      * for new connection or any update
      */
     public ngOnInit() {
-
         this.extensionConnector.connected
             .pipe(
                 takeUntil( this.destroy$ ),
@@ -165,7 +165,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     /**
      * create source for listview
      */
-    private async createSource( properties: PropertiesModel ): Promise<ListSource<any>> {
+    private async createSource( properties: PropertiesModel ): Promise<HypercubeListSource<any>> {
 
         let sessionConfig;
         let listSource;
@@ -199,6 +199,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
             this.isTree = true;
             return;
         }
+        this.listSource.acceptSelection();
     }
 
     public cancel() {
@@ -212,6 +213,12 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
             this.isTree = true;
             return;
         }
+
+        this.listSource.cancelSelection();
+    }
+
+    public onSelectItem(item: IListItem<EngineAPI.INxCell>) {
+        this.listSource.select(item);
     }
 
     public itemClick(item: IListItem<any>) {

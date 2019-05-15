@@ -1,4 +1,5 @@
 import { IListItem, ListSource, ItemIcon, ItemState, SelectionState } from "davinci.js";
+import { HypercubeListSource } from './hypercube-list.source';
 
 interface ITreeLayout extends EngineAPI.IGenericBaseLayout {
     qTreeData: EngineAPI.INxTreeNode;
@@ -28,7 +29,7 @@ declare type ListItem =
     | IListItem<EngineAPI.INxCell>[];
 
 /** only possible to make it free from listsource is to use a decorator */
-export class TreeListSource extends ListSource<EngineAPI.INxCell> {
+export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
     private sizeHc: ISizeHc;
     private expandCounter = 0;
@@ -45,15 +46,9 @@ export class TreeListSource extends ListSource<EngineAPI.INxCell> {
     }
 
     /**
-     * deselect one or multiple items on hypercube
-     */
-    public deselect(item: ListItem) {
-    }
-
-    /**
      * select one or multiple items on listobject
      */
-    public select(item: IListItemExtended) {
+    public async select(item: IListItemExtended) {
         this.treeList.selectHyperCubeValues("/qTreeDataDef", item.colNumber , [item.elNumber], true);
     }
 
