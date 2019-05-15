@@ -1,4 +1,4 @@
-import { IListItem, ListSource, ItemIcon, ItemState, SelectionState } from 'davinci.js';
+import { IListItem, ListSource, ItemIcon, ItemState, SelectionState } from "davinci.js";
 
 interface ITreeLayout extends EngineAPI.IGenericBaseLayout {
     qTreeData: EngineAPI.INxTreeNode;

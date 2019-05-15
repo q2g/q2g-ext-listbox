@@ -290,9 +290,6 @@ export const definition = {
                                     type: "number",
                                     defaultValue: 80,
                                     show: function (data: IDataProperties) {
-                                        if (data.properties.listbox.itemAlign === 1) {
-                                            data.properties.listbox.itemSize = 80;
-                                        }
                                         return data.properties.listbox.itemAlign === 1;
                                     }
                                 },
