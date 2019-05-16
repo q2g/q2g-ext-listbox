@@ -1,5 +1,6 @@
 import { IListItem, ListSource, ItemIcon, ItemState, SelectionState } from "davinci.js";
 import { HypercubeListSource } from './hypercube-list.source';
+import { SessionPropertiesFactory } from '../services/session-properties.factory';
 
 interface ITreeLayout extends EngineAPI.IGenericBaseLayout {
     qTreeData: EngineAPI.INxTreeNode;
@@ -33,13 +34,17 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
     private sizeHc: ISizeHc;
     private expandCounter = 0;
+    private selectionObject;
+    private treeLayout
+    private selections: string[] = [];
     public header: IListItemExtended[] = [];
 
     /**
      * Creates an instance of GenericListSource.
      */
     public constructor(
-        private treeList: EngineAPI.IGenericObject
+        private sessPropFactory: SessionPropertiesFactory,
+        private treeList: EngineAPI.IGenericObject,
     ) {
         super();
         this.registerEvents();
@@ -59,9 +64,21 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
     public async connect() {
         super.connect();
         const data = await this.treeList.getLayout() as any;
+        this.treeLayout = data;
 
         this.sizeHc = this.calculateSizeOfHc((data.qTreeData as any).qNodesOnDim);
         this.dataModel.total = this.sizeHc.height;
+
+        this.selectionObject = await this.treeList.app.createSessionObject(this.sessPropFactory.createSessionObject());
+        this.selectionObject.on("changed", async () => {
+            let a = await this.selectionObject.getLayout();
+            let arr: string[] = [];
+            for (const selection of (a as EngineAPI.IGenericSelectionListLayout).qSelectionObject.qSelections) {
+                arr.push(selection.qField);
+            }
+            this.selections = arr;
+        })
+        this.selectionObject.emit("changed");
     }
 
     /**
@@ -160,6 +177,11 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
         for (const rawItem of data) {
 
+            const state = rawItem.qAttrExps.qValues[1].qText;
+            const dim = this.treeLayout.qTreeData.qDimensionInfo[col].qGroupFieldDefs[0];
+            const isSelect = this.selections.indexOf(dim) > -1;
+            const a = isSelect && state === "ON"?"S":state;
+
             const subNode: IListItemExtended = {
                 hasChild: rawItem.qNodes.length > 0 ? true : false,
                 label: rawItem.qText,
@@ -173,7 +195,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
                 raw: rawItem,
                 icon: ItemIcon.NONE,
                 state: ItemState.NONE,
-                selectionState: rawItem.qAttrExps.qValues[1].qText,
+                selectionState: a,
                 isLast: col === this.sizeHc.maxWidth - 1
             };
 

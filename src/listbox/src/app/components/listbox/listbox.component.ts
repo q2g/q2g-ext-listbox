@@ -177,7 +177,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
             const sessionConfigListSource = this.sessPropFactory.createGenericList( properties )
             const listSourceExtended = await this.app.createSessionObject( sessionConfigListSource );
 
-            listSource = new TreeListSource( this.session );
+            listSource = new TreeListSource(this.sessPropFactory, this.session );
             this.listSource2 = new GenericListSource( listSourceExtended );
         } else {
             sessionConfig = this.sessPropFactory.createGenericList( properties );

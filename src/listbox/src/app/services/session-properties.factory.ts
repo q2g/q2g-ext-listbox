@@ -122,6 +122,17 @@ export class SessionPropertiesFactory {
         return listParam;
     }
 
+    /** create session parameter for selection object */
+    public createSessionObject(): EngineAPI.IGenericProperties {
+        const props = {
+            qInfo: {
+                qType: "CurrentSelection"
+            },
+            qSelectionObjectDef: {}
+        }
+        return props;
+    }
+
     /** create sort direction definitions */
     private createSortCriterias(criterias: Sort.Criterias): EngineAPI.ISortCriteria {
         const p: EngineAPI.ISortCriteria = {
