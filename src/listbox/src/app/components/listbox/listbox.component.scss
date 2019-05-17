@@ -12,19 +12,21 @@
         align-items: center;
     }
 
+
+    // TODO remove importand, check for state with list view //
     .selectionState-O {
         background-color: #DDDDDD;
-        border-color: #FFFFFF;
+        border-color: #FFFFFF !important ;
     }
 
     .selectionState-S {
         background-color: #52CC52;
-        border-color: #FFFFFF;
+        border-color: #FFFFFF !important;
     }
 
     .selectionState-N {
         background-color: #A9A9A9;
-        border-color: #FFFFFF;
+        border-color: #FFFFFF !important;
     }
 
     .extensionHeader{
@@ -37,7 +39,7 @@
         }
     }
 
-    .list-item {
+    .list-item-lable {
         padding-left: 4px;
     }
 
