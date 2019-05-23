@@ -14,11 +14,12 @@ export class SessionPropertiesFactory {
             for (const dimension of properties.dimension) {
                 subObjFieldDefs = subObjFieldDefs + "& '\uFEFF' &[" + dimension.qDef.qFieldDefs[0].replace("=", "") + "]";
             }
-            for (const dimension of properties.dimension) {
-                subObjFieldDefs = subObjFieldDefs + ', [' + dimension.qDef.qFieldDefs[0].replace("=", "") + "]";
-            }
+            // for (const dimension of properties.dimension) {
+            //     subObjFieldDefs = subObjFieldDefs + ', [' + dimension.qDef.qFieldDefs[0].replace("=", "") + "]";
+            // }
             subObjFieldDefs = subObjFieldDefs.substr(7);
-            subObjFieldDefs = "=aggr(" + subObjFieldDefs + ")";
+            subObjFieldDefs = "=" + subObjFieldDefs;
+            // subObjFieldDefs = "=aggr(" + subObjFieldDefs + ")";
         } else {
             subObjFieldDefs = properties.dimension[0].qDef.qFieldDefs[0]
         }
@@ -82,6 +83,7 @@ export class SessionPropertiesFactory {
         measure += measurePart1.slice(0, -3) + ",'O' , 'N' ))&only(if(not isnull(" + measurePart2.slice(0, -1);
         measure += "),'N', 'O'))";
 
+        console.log("measure", measure);
 
         const dimensions: EngineAPI.INxDimension[] = [];
         for (const dimension of dimensionList) {

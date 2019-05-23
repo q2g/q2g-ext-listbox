@@ -1,6 +1,7 @@
 import { IListItem, ListSource, ItemIcon, ItemState, SelectionState } from "davinci.js";
 import { HypercubeListSource } from './hypercube-list.source';
 import { SessionPropertiesFactory } from '../services/session-properties.factory';
+import { isNull } from 'util';
 
 interface ITreeLayout extends EngineAPI.IGenericBaseLayout {
     qTreeData: EngineAPI.INxTreeNode;
@@ -23,6 +24,7 @@ interface IListItemExtended extends IListItem<any> {
     measureValue: string;
     isLast: boolean;
     selectionState: string;
+    assistQRow?: number;
 }
 
 declare type ListItem =
@@ -34,9 +36,14 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
     private sizeHc: ISizeHc;
     private expandCounter = 0;
-    private selectionObject;
     private treeLayout
-    private selections: string[] = [];
+    private selections: number[] = [];
+    private selectedNodes: {lable: string, col: number}[] = [];
+    private expandedNodes: IListItemExtended[] = [];
+    private calcCounter = -1;
+
+    inSelect = false;
+
     public header: IListItemExtended[] = [];
 
     /**
@@ -54,6 +61,38 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
      * select one or multiple items on listobject
      */
     public async select(item: IListItemExtended) {
+        
+        if (!this.inSelect) {
+            await this.treeList.beginSelections(["/qTreeDataDef"]);
+            this.selectedNodes = [];
+        }
+
+        if (this.selectedNodes.length > 0) {
+
+
+            let isSelected = false;
+            let pos: number;
+
+            for (let i = 0; i < this.selectedNodes.length; i++) {
+                const element = this.selectedNodes[i];
+
+                if(element.col === item.colNumber && element.lable === item.label) {
+                    isSelected = true;
+                    pos = i;
+                }
+
+            }
+
+            if (isSelected) {
+                this.selectedNodes.splice(pos, 1);
+            } else {
+                this.selectedNodes.push({lable: item.label, col: item.colNumber});
+            }
+        } else {
+            this.selectedNodes.push({lable: item.label, col: item.colNumber});
+        }
+
+        this.inSelect = true;
         this.treeList.selectHyperCubeValues("/qTreeDataDef", item.colNumber , [item.elNumber], true);
     }
 
@@ -69,16 +108,6 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
         this.sizeHc = this.calculateSizeOfHc((data.qTreeData as any).qNodesOnDim);
         this.dataModel.total = this.sizeHc.height;
 
-        this.selectionObject = await this.treeList.app.createSessionObject(this.sessPropFactory.createSessionObject());
-        this.selectionObject.on("changed", async () => {
-            let a = await this.selectionObject.getLayout();
-            let arr: string[] = [];
-            for (const selection of (a as EngineAPI.IGenericSelectionListLayout).qSelectionObject.qSelections) {
-                arr.push(selection.qField);
-            }
-            this.selections = arr;
-        })
-        this.selectionObject.emit("changed");
     }
 
     /**
@@ -88,16 +117,8 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
         return;
     }
 
-    /**
-     * toggle selection on selected values
-     */
-    private toggleSelection(item: IListItemExtended) {
-    }
-
     /** load all items for specific page */
     public async load(start: number, count: number): Promise<IListItem<EngineAPI.INxCell>[]> {
-
-        start = start < 0 ? 0 : start;
 
         const nodes = {
             qAllValues: false,
@@ -118,14 +139,19 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
             qTreeNodes: [nodes]
         });
 
+
         let data: IListItemExtended[] = [];
 
         // todo: return header on data object
         this.header = [];
+        this.calcCounter = -1;
 
         data = this.calcRenderData(rawData[0].qNodes, data, start);
 
-        console.log("DATA", data);
+        data[0].assistQRow = data[0].rowNumber;
+        for (let i = 1; i < data.length; i++) {
+            data[i].assistQRow = data[i-1].assistQRow + 1;
+        }
 
         return data;
     }
@@ -134,24 +160,20 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
     private registerEvents() {
         this.treeList.on("changed", async () => {
             const data = await this.treeList.getLayout() as any;
+
+            this.selections = [];
+            let counter = 0;
+            for (const dimension of data.qTreeData.qDimensionInfo) {
+                if (dimension.qStateCounts.qSelected > 0) {
+                    this.selections.push(counter)
+                }
+                counter ++;
+            }
+
             this.sizeHc = this.calculateSizeOfHc((data.qTreeData as any).qNodesOnDim);
             this.dataModel.total = this.sizeHc.height;
             this.update$.next();
         });
-    }
-
-    /**
-     * get icon for state
-     */
-    private getIcon(state: EngineAPI.NxCellStateType): ItemIcon {
-        return
-    }
-
-    /**
-     * get state for item
-     */
-    private getState(state: EngineAPI.NxCellStateType): ItemState {
-        return;
     }
 
     private calculateSizeOfHc(nodesOnDimension: number[]): ISizeHc {
@@ -172,14 +194,31 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
     }
 
     private calcRenderData(data: any, calcData: IListItemExtended[], index: number, parrentRowNumber = -1, colNum = -1): IListItemExtended[] {
-
+        this.calcCounter++;
         const col = colNum + 1;
+
+
 
         for (const rawItem of data) {
 
             const state = rawItem.qAttrExps.qValues[1].qText;
             const dim = this.treeLayout.qTreeData.qDimensionInfo[col].qGroupFieldDefs[0];
-            const isSelect = this.selections.indexOf(dim) > -1;
+            let isSelect = this.selections.indexOf(col) > -1;
+            if (isSelect) {
+                isSelect = true;
+
+                if (this.inSelect) {
+                    let filtered = this.selectedNodes.filter((value) => {
+                        if (value.lable === rawItem.qText) {
+                            return true;
+                        }
+                    });
+    
+                    if (filtered.length === 0) {
+                        isSelect = false;
+                    }
+                }
+            }
             const a = isSelect && state === "ON"?"S":state;
 
             const subNode: IListItemExtended = {
@@ -210,17 +249,59 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
         return calcData;
     }
 
+    private removeExpandNode(item: IListItemExtended): void {
+
+        for (let i = 0; i < this.expandedNodes.length; i++) {
+            const node = this.expandedNodes[i];
+            if (node.label === item.label && node.rowNumber === item.rowNumber) {
+                this.expandedNodes.slice(i, 1);
+            }
+        }
+    }
+
     public async expandCollapseItem(item: IListItemExtended) {
+
+        if (this.inSelect) {
+            await this.treeList.endSelections(true);
+        }
+
         if (item.hasChild) {
             this.expandCounter--;
+            this.removeExpandNode(item);
             await this.treeList.collapseLeft("/qTreeDataDef", item.rowNumber, item.colNumber, false);
         } else {
             this.expandCounter++;
+            this.expandedNodes.push(item);
             await this.treeList.expandLeft("/qTreeDataDef", item.rowNumber, item.colNumber, false);
         }
+
+        if (this.inSelect) {
+            await this.treeList.beginSelections(["/qTreeDataDef"]);
+        }
+
     }
 
     public getHeader() {
         return this.header;
+    }
+
+    public scrollTo(item: IListItemExtended) {
+
+        for (const node of this.expandedNodes) {
+            if (node.colNumber === item.colNumber && node.label === item.label) {
+                return node.rowNumber
+            }
+        }
+
+    }
+
+    public acceptSelection() {
+        this.inSelect = false;
+        return this.treeList.endSelections(true);
+    }
+
+    public cancelSelection() {
+        this.inSelect = false;
+        return this.treeList.endSelections(false);
     }
 }

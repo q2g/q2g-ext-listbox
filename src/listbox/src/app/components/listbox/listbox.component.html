@@ -15,6 +15,13 @@
 
 <div class="extensionHeader">
     <davinci-search [placeholder]="'Search'" (changed)="onSearch($event)"></davinci-search>
+
+    <div class="list-header" *ngIf="listSource">
+        <span *ngFor="let head of listSource.getHeader()" (click)=scrollTo(head)>
+            {{head.label}}
+        </span>
+    </div>
+
     <davinci-responsive-menu>
         <davinci-icon class="buttonIcon" buttonType="danger" icon="close" [isActive]="true" (click)="cancel()">
         </davinci-icon>
