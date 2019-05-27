@@ -1,17 +1,19 @@
-export function map(map) {
+export function map(data) {
 
-    return function (target, key = null, descriptor: PropertyDescriptor): PropertyDescriptor {
+    // tslint:disable-next-line: only-arrow-functions
+    return function(target, key = null, descriptor: PropertyDescriptor): PropertyDescriptor {
         if ( !descriptor ) {
             descriptor = Object.getOwnPropertyDescriptor(target, key);
         }
         return {
-            set: function (value) {
-                const mappedValue = map.hasOwnProperty(value) ? map[value] : value;
+            // tslint:disable-next-line: object-literal-shorthand
+            set: function(value) {
+                const mappedValue = data.hasOwnProperty(value) ? data[value] : value;
                 // get all properties, exclude decorated property
                 return descriptor.set.call(this, mappedValue);
             },
             enumerable: true,
             configurable: true
         };
-    }
+    };
 }
