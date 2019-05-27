@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 import { App } from "../../services/qlik-global-module.factory";
 import { ExtensionComponent } from "../../api/extension.component.interface";
-import { DOCUMENT } from '@angular/platform-browser';
+import { DOCUMENT } from "@angular/platform-browser";
 
 declare module qlik {
     const e: RootAPI.IRoot;

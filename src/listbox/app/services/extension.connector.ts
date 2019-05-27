@@ -1,6 +1,6 @@
 import { PropertiesModel } from '../model/properties.model';
 import { Subject, ReplaySubject } from 'rxjs';
-import { Sort } from 'extension/api/porperties.interface';
+import { Sort } from '../api/porperties.interface';
 import { ListProperties } from '../model/list-properties.model';
 import { mapDataTo } from '../utils/map-data-to.decorator';
 
@@ -25,12 +25,9 @@ export class ExtensionConnector {
      * connect
      */
     public async connect( model: EngineAPI.IGenericObject ) {
-
         this.extensionModel = model;
-
         /** register events to handle changes */
         this.registerEvents();
-
         /** fetch initial properties */
         await this.fetchProperties();
         this.connected.next(this.extensionProperties);

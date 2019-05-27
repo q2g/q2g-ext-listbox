@@ -3,13 +3,13 @@ import { ListViewComponent, IListItem } from "davinci.js";
 import { Subject } from "rxjs";
 import { takeUntil, switchMap } from "rxjs/operators";
 import { ExtensionComponent } from "../../api/extension.component.interface";
-import { ExtensionConnector, IExtensionUpdate } from '../../services/extension.connector';
-import { PropertiesModel } from '../../model/properties.model';
-import { SessionPropertiesFactory } from '../../services/session-properties.factory';
-import { TreeListSource } from 'src/app/model/tree-list.source';
-import { GenericListSource } from 'src/app/model/generic-list.source';
-import { ListProperties } from 'src/app/model/list-properties.model';
-import { HypercubeListSource } from 'src/app/model/hypercube-list.source';
+import { ExtensionConnector, IExtensionUpdate } from "../../services/extension.connector";
+import { SessionPropertiesFactory } from "../../services/session-properties.factory";
+import { PropertiesModel } from "../../model/properties.model";
+import { TreeListSource } from "../../model/tree-list.source";
+import { GenericListSource } from "../..//model/generic-list.source";
+import { ListProperties } from "../../model/list-properties.model";
+import { HypercubeListSource } from "../../model/hypercube-list.source";
 
 @Component( {
     selector: "q2g-listbox",
@@ -46,7 +46,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     @ViewChild( ListViewComponent )
     private listView: ListViewComponent<any>;
 
-    public constructor (
+    public constructor(
         private sessPropFactory: SessionPropertiesFactory,
         private changeDetector: ChangeDetectorRef
     ) {
@@ -55,9 +55,9 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     }
 
     @Input()
-    public set model( model: EngineAPI.IGenericObject ) {
+    public set model(model: EngineAPI.IGenericObject) {
         this.app = model.app;
-        this.extensionConnector.connect( model );
+        this.extensionConnector.connect(model);
     }
 
     /**
@@ -70,7 +70,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
                 takeUntil( this.destroy$ ),
                 switchMap((properties) => {
                     this.applyProperties( properties );
-                    return this.extensionConnector.update$
+                    return this.extensionConnector.update$;
                 })
             )
             .subscribe( ( update: IExtensionUpdate ) => this.handleExtensionUpdate( update ) );
@@ -104,18 +104,18 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
     private handleExtensionUpdate( update: IExtensionUpdate ) {
         switch ( update.type ) {
-            case 'view':
+            case "view":
                 this.setViewProperties( update.properties.listConfiguration );
                 break;
-            case 'session':
+            case "session":
                 this.handleSessionUpdate( update.properties );
                 break;
             default:
                 this.handleSourceUpdate( update.properties );
         }
 
-        /** 
-         * this is black magic, but we have to do this otherwise 
+        /**
+         * this is black magic, but we have to do this otherwise
          * our properties will not change ... and i dont know why
          */
         this.changeDetector.detectChanges();
@@ -130,14 +130,13 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     private handleSessionUpdate( properties: PropertiesModel ) {
         const sessionConfig = properties.dimension.length > 1
             ? this.sessPropFactory.createTreeProperties( properties )
-            : this.sessPropFactory.createGenericList( properties )
+            : this.sessPropFactory.createGenericList( properties );
 
         this.session.setProperties(sessionConfig);
     }
 
     /** set view properties */
     private setViewProperties(properties: ListProperties) {
-
         if (this.isTree) {
             this.listAlign = "vertical";
             this.itemSize  = 30;
@@ -151,7 +150,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
         }
     }
 
-    /** 
+    /**
      * read out properties from extension propertie model
      * and pass it to view
      */
@@ -174,7 +173,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
             sessionConfig = this.sessPropFactory.createTreeProperties( properties );
             this.session = await this.app.createSessionObject( sessionConfig );
 
-            const sessionConfigListSource = this.sessPropFactory.createGenericList( properties )
+            const sessionConfigListSource = this.sessPropFactory.createGenericList( properties );
             const listSourceExtended = await this.app.createSessionObject( sessionConfigListSource );
 
             listSource = new TreeListSource(this.sessPropFactory, this.session );
@@ -203,7 +202,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     }
 
     public cancel() {
-        if(this.inSearch) {
+        if (this.inSearch) {
             if (this.listSource2) {
                 this.listSource2.abortListObjectSearch();
             } else {

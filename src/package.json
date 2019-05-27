@@ -9,6 +9,7 @@
   },
   "author": "Thomas Häning, Konrad Mattheis, Ralf Hannuschka (qlik2go) ",
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^7.4.3",
     "@angular-devkit/build-angular": "^0.13.8",
     "@angular/cdk": "^7.3.7",
     "@angular/cli": "^7.3.8",
@@ -32,11 +33,11 @@
     "karma-jasmine": "~1.1.2",
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "~5.4.0",
-    "q2g-build": "^1.3.2",
     "ts-node": "~7.0.0",
     "tslib": "^1.9.3",
     "tslint": "~5.11.0",
-    "typescript": "~3.2.2"
+    "typescript": "~3.2.2",
+    "jszip": "^3.2.1"
   },
   "dependencies": {
     "@angular/common": "^7.2.12",
@@ -62,7 +63,11 @@
     "type": "visualization"
   },
   "scripts": {
-    "q2g-build:dev": "node node_modules/q2g-build --builder extension --config q2g-build.webpack.json",
-    "q2g-build:prod": "node node_modules/q2g-build --builder extension --env production --config q2g-build.webpack.json"
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e"
   }
 }
