@@ -1,26 +1,28 @@
 {
-  "baseUrl": ".",
-  "compileOnSave": true,
-  "exclude": [
-    ".vscode",
-    "node_modules"
-  ],
+  "compileOnSave": false,
   "compilerOptions": {
-    "module": "umd",
-    "noEmitOnError": true,
-    "noImplicitAny": false,
-    "removeComments": false,
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
     "sourceMap": true,
+    "declaration": false,
+    "module": "es2015",
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
     "target": "es5",
     "lib": [
-      "dom",
-      "es5",
-      "es2015.promise",
-      "es2015.iterable",
-      "scripthost"
-    ]
-  },
-  "include": [
-    "extension/**/*.ts"
-  ]
+      "es2018",
+      "dom"
+    ],
+    "paths": {
+      "gauguin/*": [
+        "dist/gauguin/*",
+        "dist/gauguin/*"
+      ],
+      "extension/*": [
+          "../extension/*"
+      ]
+    }
+  }
 }

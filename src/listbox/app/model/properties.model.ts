@@ -1,6 +1,6 @@
 import { ListProperties } from './list-properties.model';
 import { mapDataTo } from '../utils/map-data-to.decorator';
-import { Sort } from "extension/api/porperties.interface"
+import { Sort } from "../api/porperties.interface"
 import { clone } from '../utils/clone.decorator';
 
 export class PropertiesModel {

@@ -10,7 +10,7 @@ import { BootstrapComponent } from "./components/bootstrap/bootstrap.component";
 import { SearchModule, ListViewModule } from "davinci.js";
 import { IconModule, ResponsiveMenuModule } from "davinci.js";
 
-@NgModule({
+@NgModule( {
     imports: [
         BrowserModule,
         ScrollingModule,
@@ -23,16 +23,17 @@ import { IconModule, ResponsiveMenuModule } from "davinci.js";
     exports: [],
     declarations: [BootstrapComponent, ListboxComponent],
     entryComponents: [BootstrapComponent, ListboxComponent]
-})
+} )
 export class ListboxModule implements DoBootstrap {
-    public constructor(private injector: Injector) {}
+
+    public constructor(private injector: Injector) { }
 
     ngDoBootstrap() {
-        const bootrapInjector = Injector.create(
-            [
+        const bootrapInjector = Injector.create({
+            providers: [
                 {
                     provide: "ExtensionView",
-                    useFactory: (factoryResolver: ComponentFactoryResolver) => {
+                    useFactory: ( factoryResolver: ComponentFactoryResolver ) => {
                         return factoryResolver.resolveComponentFactory(
                             ListboxComponent
                         );
@@ -40,12 +41,13 @@ export class ListboxModule implements DoBootstrap {
                     deps: [ComponentFactoryResolver]
                 }
             ],
-            this.injector
-        );
-
-        const q2gBoostrap = createCustomElement(BootstrapComponent, {
-            injector: bootrapInjector
+            parent: this.injector,
+            name: "q2g-ngx-extension-injector"
         });
-        customElements.define("q2g-ngx-extension", q2gBoostrap);
+
+        const q2gBoostrap = createCustomElement( BootstrapComponent, {
+            injector: bootrapInjector
+        } );
+        customElements.define( "q2g-ngx-extension", q2gBoostrap );
     }
 }

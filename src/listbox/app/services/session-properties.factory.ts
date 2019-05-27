@@ -1,5 +1,5 @@
 import { PropertiesModel } from '../model/properties.model';
-import { Sort } from 'extension/api/porperties.interface';
+import { Sort } from '../api/porperties.interface';
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: "root" })
