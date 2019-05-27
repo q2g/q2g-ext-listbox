@@ -1,5 +1,5 @@
-import { IListItem, ItemIcon, ItemState, SelectionState } from 'davinci.js';
-import { HypercubeListSource } from './hypercube-list.source';
+import { IListItem, ItemIcon, ItemState, SelectionState } from "davinci.js";
+import { HypercubeListSource } from "./hypercube-list.source";
 
 declare type ListItem =
     | IListItem<EngineAPI.INxCell>
@@ -8,7 +8,7 @@ declare type ListItem =
 /** only possible to make it free from listsource is to use a decorator */
 export class GenericListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
-    private isSelectionActive: boolean = false;
+    private isSelectionActive = false;
 
     /**
      * Creates an instance of GenericListSource.
@@ -173,6 +173,10 @@ export class GenericListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
     public abortListObjectSearch() {
         this.genericList.abortListObjectSearch("/qListObjectDef");
+    }
+
+    public scrollTo(item: any): number {
+        return 0;
     }
 
 }

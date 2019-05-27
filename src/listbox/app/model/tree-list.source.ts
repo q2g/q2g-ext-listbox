@@ -1,7 +1,7 @@
 import { IListItem, ListSource, ItemIcon, ItemState, SelectionState } from "davinci.js";
-import { HypercubeListSource } from './hypercube-list.source';
-import { SessionPropertiesFactory } from '../services/session-properties.factory';
-import { isNull } from 'util';
+import { HypercubeListSource } from "./hypercube-list.source";
+import { SessionPropertiesFactory } from "../services/session-properties.factory";
+import { isNull } from "util";
 
 interface ITreeLayout extends EngineAPI.IGenericBaseLayout {
     qTreeData: EngineAPI.INxTreeNode;
@@ -36,7 +36,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
     private sizeHc: ISizeHc;
     private expandCounter = 0;
-    private treeLayout
+    private treeLayout;
     private selections: number[] = [];
     private selectedNodes: {lable: string, col: number}[] = [];
     private expandedNodes: IListItemExtended[] = [];
@@ -61,7 +61,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
      * select one or multiple items on listobject
      */
     public async select(item: IListItemExtended) {
-        
+
         if (!this.inSelect) {
             await this.treeList.beginSelections(["/qTreeDataDef"]);
             this.selectedNodes = [];
@@ -76,7 +76,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
             for (let i = 0; i < this.selectedNodes.length; i++) {
                 const element = this.selectedNodes[i];
 
-                if(element.col === item.colNumber && element.lable === item.label) {
+                if (element.col === item.colNumber && element.lable === item.label) {
                     isSelected = true;
                     pos = i;
                 }
@@ -150,7 +150,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
         data[0].assistQRow = data[0].rowNumber;
         for (let i = 1; i < data.length; i++) {
-            data[i].assistQRow = data[i-1].assistQRow + 1;
+            data[i].assistQRow = data[i - 1].assistQRow + 1;
         }
 
         return data;
@@ -165,7 +165,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
             let counter = 0;
             for (const dimension of data.qTreeData.qDimensionInfo) {
                 if (dimension.qStateCounts.qSelected > 0) {
-                    this.selections.push(counter)
+                    this.selections.push(counter);
                 }
                 counter ++;
             }
@@ -193,7 +193,10 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
         };
     }
 
-    private calcRenderData(data: any, calcData: IListItemExtended[], index: number, parrentRowNumber = -1, colNum = -1): IListItemExtended[] {
+    private calcRenderData(
+        data: any, calcData: IListItemExtended[],
+        index: number, parrentRowNumber = -1, colNum = -1
+    ): IListItemExtended[] {
         this.calcCounter++;
         const col = colNum + 1;
 
@@ -208,18 +211,18 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
                 isSelect = true;
 
                 if (this.inSelect) {
-                    let filtered = this.selectedNodes.filter((value) => {
+                    const filtered = this.selectedNodes.filter((value) => {
                         if (value.lable === rawItem.qText) {
                             return true;
                         }
                     });
-    
+
                     if (filtered.length === 0) {
                         isSelect = false;
                     }
                 }
             }
-            const a = isSelect && state === "ON"?"S":state;
+            const a = isSelect && state === "ON" ? "S" : state;
 
             const subNode: IListItemExtended = {
                 hasChild: rawItem.qNodes.length > 0 ? true : false,
@@ -289,7 +292,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
         for (const node of this.expandedNodes) {
             if (node.colNumber === item.colNumber && node.label === item.label) {
-                return node.rowNumber
+                return node.rowNumber;
             }
         }
 

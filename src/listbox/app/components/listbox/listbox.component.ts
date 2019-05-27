@@ -225,7 +225,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
     }
 
     public scrollTo(item: IListItem<any>) {
-        const index = this.listSource.scrollTo(item)
-        this.listView.scrollTo(index * this.itemSize);
+        // const index = this.listSource.scrollTo(item);
+        // this.listView.scrollTo(this.itemSize * index);
     }
 }
