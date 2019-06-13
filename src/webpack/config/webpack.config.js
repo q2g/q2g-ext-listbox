@@ -2,12 +2,10 @@ const ExtensionService = require('../services/extension.service');
 const CreateExtensionPlugin = require('../plugins/create-extension.plugin');
 const DeployExtensionPlugin = require('../plugins/deploy-extension.plugin');
 const ConcatEntryPointsPlugin = require('../plugins/concat-entry-points.plugin');
-const core_1 = require("@angular-devkit/core");
 const path = require('path');
 
 /** export modified webpack config */
 module.exports = (config) => {
-
 
     const extensionService     = ExtensionService.getInstance();
     extensionService.rootDir   = config.context;

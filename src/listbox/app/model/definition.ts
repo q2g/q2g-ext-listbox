@@ -57,7 +57,7 @@ export const definition = {
                             ref: "properties.sort.by.expressionFcn.value",
                             type: "string",
                             expression: "optional",
-                            show: function (data: IDataProperties) {
+                            show: (data: IDataProperties) => {
                                 return data.properties.sort.by.expression.enabled;
                             }
                         },
@@ -73,12 +73,12 @@ export const definition = {
                                 label: "descending"
                             }],
                             defaultValue: "a",
-                            show: function (data: IDataProperties) {
+                            show: (data: IDataProperties) => {
                                 return data.properties.sort.by.expression.orderBy;
                             }
                         }
                     },
-                    show: function (data: IDataProperties) {
+                    show: (data: IDataProperties) => {
                         if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.expression.enabled = false;
                         }
@@ -107,12 +107,12 @@ export const definition = {
                                 label: "descending"
                             }],
                             defaultValue: "a",
-                            show: function (data: IDataProperties) {
+                            show: (data: IDataProperties) => {
                                 return data.properties.sort.by.frequency.orderBy;
                             }
                         }
                     },
-                    show: function (data: IDataProperties) {
+                    show: (data: IDataProperties) => {
                         if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.frequency.enabled = false;
                         }
@@ -141,12 +141,12 @@ export const definition = {
                                 label: "descending"
                             }],
                             defaultValue: "a",
-                            show: function (data: IDataProperties) {
+                            show: (data: IDataProperties) => {
                                 return data.properties.sort.by.numeric.orderBy;
                             }
                         }
                     },
-                    show: function (data: IDataProperties) {
+                    show: (data: IDataProperties) => {
                         if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.numeric.enabled = true;
                         }
@@ -175,12 +175,12 @@ export const definition = {
                                 label: "descending"
                             }],
                             defaultValue: "a",
-                            show: function (data: IDataProperties) {
+                            show: (data: IDataProperties) => {
                                 return data.properties.sort.by.ascii.orderBy;
                             }
                         }
                     },
-                    show: function (data: IDataProperties) {
+                    show: (data: IDataProperties) => {
                         if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.ascii.enabled = true;
                         }
@@ -209,12 +209,12 @@ export const definition = {
                                 label: "descending"
                             }],
                             defaultValue: "a",
-                            show: function (data: IDataProperties) {
+                            show: (data: IDataProperties) => {
                                 return data.properties.sort.by.state.orderBy;
                             }
                         }
                     },
-                    show: function (data: IDataProperties) {
+                    show: (data: IDataProperties) => {
                         if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.state.enabled = true;
                         }
@@ -243,12 +243,12 @@ export const definition = {
                                 label: "descending"
                             }],
                             defaultValue: "a",
-                            show: function (data: IDataProperties) {
+                            show: (data: IDataProperties) => {
                                 return data.properties.sort.by.loadOrder.orderBy;
                             }
                         }
                     },
-                    show: function (data: IDataProperties) {
+                    show: (data: IDataProperties) => {
                         if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.loadOrder.enabled = false;
                         }
@@ -289,7 +289,7 @@ export const definition = {
                                     label: "Field Size",
                                     type: "number",
                                     defaultValue: 80,
-                                    show: function (data: IDataProperties) {
+                                    show: (data: IDataProperties) => {
                                         return data.properties.listbox.itemAlign === 1;
                                     }
                                 },
@@ -319,7 +319,7 @@ export const definition = {
                                     label: "how many columns",
                                     type: "number",
                                     defaultValue: 1,
-                                    show: function (data: IDataProperties) {
+                                    show: (data: IDataProperties) => {
                                         if (!data.properties.listbox.splitActive) {
                                             data.properties.listbox.splitCols = 1;
                                         }
@@ -340,7 +340,7 @@ export const definition = {
                                         label: "horizontal"
                                     }],
                                     defaultValue: 0,
-                                    show: function (data: IDataProperties) {
+                                    show: (data: IDataProperties) => {
                                         if (!data.properties.listbox.splitActive) {
                                             data.properties.listbox.splitAlign = 0;
                                         }
@@ -350,7 +350,7 @@ export const definition = {
                             }
                         }
                     },
-                    show: function (data: IDataProperties) {
+                    show: (data: IDataProperties) => {
                         return data.qHyperCubeDef.qDimensions.length < 2;
                     }
                 }

@@ -5,7 +5,7 @@
             [ngClass]="[item.hasChild ? 'lui-icon lui-icon--minus' : 'lui-icon lui-icon--plus']"
             (click)="expandCollapseItem(item); $event.stopPropagation()">
         </i>
-        <span class="list-item-lable">
+        <span class="list-item-label">
             <span class="item-label">{{item.label}}</span>
             <i [ngClass]="[item.icon !== 'none' ? 'lui-icon lui-icon--' + item.icon : '']"></i>
         </span>
@@ -25,7 +25,7 @@
     <davinci-responsive-menu>
         <davinci-icon class="buttonIcon" buttonType="danger" icon="close" [isActive]="true" (click)="cancel()">
         </davinci-icon>
-        <davinci-icon class="buttonIcon" buttonType="success" [isActive]="true" lable="{{inSearch}}" (click)="accept()">
+        <davinci-icon class="buttonIcon" buttonType="success" [isActive]="true" label="{{inSearch}}" (click)="accept()">
         </davinci-icon>
     </davinci-responsive-menu>
 </div>

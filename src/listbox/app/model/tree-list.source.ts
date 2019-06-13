@@ -38,7 +38,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
     private expandCounter = 0;
     private treeLayout;
     private selections: number[] = [];
-    private selectedNodes: {lable: string, col: number}[] = [];
+    private selectedNodes: {label: string, col: number}[] = [];
     private expandedNodes: IListItemExtended[] = [];
     private calcCounter = -1;
 
@@ -76,7 +76,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
             for (let i = 0; i < this.selectedNodes.length; i++) {
                 const element = this.selectedNodes[i];
 
-                if (element.col === item.colNumber && element.lable === item.label) {
+                if (element.col === item.colNumber && element.label === item.label) {
                     isSelected = true;
                     pos = i;
                 }
@@ -86,10 +86,10 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
             if (isSelected) {
                 this.selectedNodes.splice(pos, 1);
             } else {
-                this.selectedNodes.push({lable: item.label, col: item.colNumber});
+                this.selectedNodes.push({label: item.label, col: item.colNumber});
             }
         } else {
-            this.selectedNodes.push({lable: item.label, col: item.colNumber});
+            this.selectedNodes.push({label: item.label, col: item.colNumber});
         }
 
         this.inSelect = true;
@@ -212,7 +212,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
                 if (this.inSelect) {
                     const filtered = this.selectedNodes.filter((value) => {
-                        if (value.lable === rawItem.qText) {
+                        if (value.label === rawItem.qText) {
                             return true;
                         }
                     });

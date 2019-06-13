@@ -11,6 +11,15 @@ class ExtensionService {
         this._rootDirectory = process.cwd();
         this._outDirectory  = process.cwd();
         this._extOutDir     = process.cwd();
+        this._isDirty       = false;
+    }
+
+    set isDirty(dirty) {
+        this._isDirty = dirty;
+    }
+
+    get isDirty() {
+        return this._isDirty;
     }
 
     set rootDir(path) {

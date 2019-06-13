@@ -24,8 +24,10 @@ class DeployExtensionPlugin {
 
     apply(compiler) {
         compiler.hooks.afterEmit.tapAsync("ExtensionDone", async (compilation, callback) => {
-            await this.deployQrs();
-            this.deployDesktop();
+            if (this.extensionService.isDirty) {
+                await this.deployQrs();
+                this.deployDesktop();
+            }
             callback();
         });
     }

@@ -43,7 +43,7 @@ export class ListboxComponent implements OnDestroy, OnInit, ExtensionComponent {
 
     private destroy$: Subject<boolean>;
 
-    @ViewChild( ListViewComponent )
+    @ViewChild(ListViewComponent, {read: ListViewComponent, static: true})
     private listView: ListViewComponent<any>;
 
     public constructor(
