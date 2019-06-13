@@ -79,7 +79,7 @@ export const definition = {
                         }
                     },
                     show: (data: IDataProperties) => {
-                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                        if (data.properties.sort && data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.expression.enabled = false;
                         }
                         return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
@@ -113,7 +113,7 @@ export const definition = {
                         }
                     },
                     show: (data: IDataProperties) => {
-                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                        if (data.properties.sort && data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.frequency.enabled = false;
                         }
                         return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
@@ -147,7 +147,7 @@ export const definition = {
                         }
                     },
                     show: (data: IDataProperties) => {
-                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                        if (data.properties.sort && data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.numeric.enabled = true;
                         }
                         return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
@@ -181,7 +181,7 @@ export const definition = {
                         }
                     },
                     show: (data: IDataProperties) => {
-                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                        if (data.properties.sort && data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.ascii.enabled = true;
                         }
                         return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
@@ -215,7 +215,7 @@ export const definition = {
                         }
                     },
                     show: (data: IDataProperties) => {
-                        if (data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
+                        if (data.properties.sort && data.properties.sort.mode === Sort.Mode.AUTOMATIC) {
                             data.properties.sort.by.state.enabled = true;
                         }
                         return data.properties.sort.mode === Sort.Mode.INDIVIDUAL;
