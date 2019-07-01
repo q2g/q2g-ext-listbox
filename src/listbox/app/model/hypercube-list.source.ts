@@ -15,5 +15,5 @@ export abstract class HypercubeListSource<T> extends ListSource<T> implements Li
 
     public async acceptSelection(): Promise<void> { /** noop */ }
 
-    abstract scrollTo(item: any): number;
+    public async scrollTo(item): Promise<number> {return new Promise((resolve, reject) => {resolve(); } ); }
 }

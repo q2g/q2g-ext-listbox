@@ -1,20 +1,21 @@
 import { IListItem, ItemIcon, ItemState, SelectionState } from "davinci.js";
 import { HypercubeListSource } from "./hypercube-list.source";
-import { SessionPropertiesFactory } from "../services/session-properties.factory";
 import { IExpansionHc } from "../api/expansionHc.interface";
 import { IListItemExtended } from "../api/listItemExtended.interface";
-import { ITreeLayout } from "../api/treeLayout.interface";
 
 export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
 
     public inSelect = false;
+    public header: IListItemExtended[] = [];
 
     private expansionHc: IExpansionHc;
     private expandCounter = 0;
-    private selectedNodes: {lable: string, col: number}[] = [];
-    private expandedNodes: IListItemExtended[] = [];
+    private selectedNodes: { lable: string, col: number }[] = [];
+    private expandedNodes: { item: IListItemExtended, path: any }[] = [];
     private selectionIndexes: number[] = [];
-    public header: IListItemExtended[] = [];
+    private rawData: any[];
+    private midData: IListItemExtended[] = [];
+
 
     /**
      * Creates an instance of GenericListSource.
@@ -56,7 +57,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
             }
         };
 
-        const rawData: any[] = await (this.treeList as any).getHyperCubeTreeData("/qTreeDataDef", {
+        this.rawData = await (this.treeList as any).getHyperCubeTreeData("/qTreeDataDef", {
             qMaxNbrOfNodes: 10000,
             qTreeLevels: {
                 qDepth: -1,
@@ -65,21 +66,18 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
             qTreeNodes: [nodes]
         });
 
-
-        let data: IListItemExtended[] = [];
-
         // todo: return header on data object
         this.header = [];
-        // this.calcCounter = -1;
 
-        data = this.calcRenderData(rawData[0].qNodes, data, start);
+        this.midData = [];
+        this.midData = this.calcRenderData(this.rawData[0].qNodes, this.midData, start);
 
-        data[0].assistQRow = data[0].rowNumber;
-        for (let i = 1; i < data.length; i++) {
-            data[i].assistQRow = data[i - 1].assistQRow + 1;
+        this.midData[0].assistQRow = this.midData[0].rowNumber;
+        for (let i = 1; i < this.midData.length; i++) {
+            this.midData[i].assistQRow = this.midData[i - 1].assistQRow + 1;
         }
 
-        return data;
+        return this.midData;
     }
 
     /**
@@ -114,8 +112,94 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
             await this.treeList.collapseLeft("/qTreeDataDef", item.rowNumber, item.colNumber, false);
         } else {
             this.expandCounter++;
-            this.expandedNodes.push(item);
+            let parrentNodeInfo;
+
+            for (const i of this.midData) {
+                if (i.nodeNumber === item.parentNode) {
+                    parrentNodeInfo = {
+                        colNum: i.colNumber,
+                        label: i.label
+                    };
+                }
+            }
+
+            let path;
+
+            for (const i of this.expandedNodes) {
+                if (i.item.colNumber === parrentNodeInfo.colNum && i.item.label === parrentNodeInfo.label) {
+                    path = i.path;
+                }
+            }
+
+            if (path) {
+                const data = await (this.treeList as any).getHyperCubeTreeData("/qTreeDataDef", path);
+
+                const a = {
+                    MaxNbrOfNodes: 10000,
+                    qTreeLevels: {
+                        qDepth: -1,
+                        qLeft: item.colNumber + 1
+                    },
+                    qTreeNodes: JSON.parse(JSON.stringify(path.qTreeNodes))
+                };
+
+                a.qTreeNodes[a.qTreeNodes.length - 1].qArea.qTop = item.rowNumber - data[0].qNodes[0].qRow;
+                a.qTreeNodes.push({
+                    qAllValues: false,
+                    qArea: {
+                        qHeight: 1,
+                        qLeft: item.colNumber + 1,
+                        qTop: 0,
+                        qWidth: 1
+                    }
+                });
+
+                this.expandedNodes.push({ item, path: a });
+
+            } else {
+
+                const nodes = [];
+
+                for (let i = 0; i <= item.colNumber; i++) {
+
+                    nodes.push({
+                        qAllValues: false,
+                        qArea: {
+                            qHeight: 1,
+                            qLeft: i,
+                            qTop: item.rowNumber,
+                            qWidth: 1
+                        }
+                    });
+
+                }
+
+                nodes.push({
+                    qAllValues: false,
+                    qArea: {
+                        qHeight: 1,
+                        qLeft: item.colNumber + 1,
+                        qTop: 0,
+                        qWidth: 1
+                    }
+                });
+
+
+                const a = {
+                    MaxNbrOfNodes: 10000,
+                    qTreeLevels: {
+                        qDepth: -1,
+                        qLeft: item.colNumber + 1
+                    },
+                    qTreeNodes: nodes
+                };
+
+
+                this.expandedNodes.push({ item, path: a });
+            }
+
             await this.treeList.expandLeft("/qTreeDataDef", item.rowNumber, item.colNumber, false);
+
         }
 
         if (this.inSelect) {
@@ -148,20 +232,19 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
                     isSelected = true;
                     pos = i;
                 }
-
             }
 
             if (isSelected) {
                 this.selectedNodes.splice(pos, 1);
             } else {
-                this.selectedNodes.push({lable: item.label, col: item.colNumber});
+                this.selectedNodes.push({ lable: item.label, col: item.colNumber });
             }
         } else {
-            this.selectedNodes.push({lable: item.label, col: item.colNumber});
+            this.selectedNodes.push({ lable: item.label, col: item.colNumber });
         }
 
         this.inSelect = true;
-        await this.treeList.selectHyperCubeValues("/qTreeDataDef", item.colNumber , [item.elNumber], true);
+        await this.treeList.selectHyperCubeValues("/qTreeDataDef", item.colNumber, [item.elNumber], true);
         return;
     }
 
@@ -169,14 +252,30 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
      * scroll to a specific list item
      * @param item list item to be scrolled to
      */
-    public scrollTo(item: IListItemExtended): number {
+    public async scrollTo(item: IListItemExtended): Promise<number> {
 
-        for (const node of this.expandedNodes) {
-            if (node.colNumber === item.colNumber && node.label === item.label) {
-                return node.rowNumber;
+        return new Promise<number>(async (resolve, reject) => {
+
+            try {
+
+                let a: any;
+
+                for (const expandNode of this.expandedNodes) {
+                    if (expandNode.item.colNumber === item.colNumber && expandNode.item.label === item.label) {
+                        a = expandNode.path;
+                    }
+                }
+
+                const data = await (this.treeList as any).getHyperCubeTreeData("/qTreeDataDef", a);
+                console.log("scroll to data: ", data);
+
+                resolve(data[0].qNodes[0].qRow);
+
+            } catch (error) {
+                reject(error);
             }
-        }
 
+        });
     }
 
     /**
@@ -199,7 +298,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
     private removeExpandNode(item: IListItemExtended): void {
 
         for (let i = 0; i < this.expandedNodes.length; i++) {
-            const node = this.expandedNodes[i];
+            const node = this.expandedNodes[i].item;
             if (node.label === item.label && node.rowNumber === item.rowNumber) {
                 this.expandedNodes.slice(i, 1);
             }
@@ -217,7 +316,7 @@ export class TreeListSource extends HypercubeListSource<EngineAPI.INxCell> {
                 if (dimension.qStateCounts.qSelected > 0) {
                     this.selectionIndexes.push(rowCounter);
                 }
-                rowCounter ++;
+                rowCounter++;
             }
 
             this.expansionHc = this.calculateSizeOfHc((data.qTreeData as any).qNodesOnDim);

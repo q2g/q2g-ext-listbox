@@ -175,8 +175,10 @@ export class GenericListSource extends HypercubeListSource<EngineAPI.INxCell> {
         this.genericList.abortListObjectSearch("/qListObjectDef");
     }
 
-    public scrollTo(item: any): number {
-        return 0;
+    public scrollTo(item: any): Promise<number> {
+        return new Promise((resolve, reject) => {
+            resolve(0);
+        });
     }
 
 }
