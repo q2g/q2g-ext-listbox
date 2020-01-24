@@ -169,7 +169,6 @@ class ListboxController extends utils.RootSingleList implements ng.IController, 
                     this.showHeaderButtons = false;
                     this.showHeaderInput = false;
                     this.headerInput= "";
-                    this.timeout();
                 }
             } catch (e) {
                 this.logger.error("Error in Constructor with click event", e);
@@ -406,7 +405,6 @@ class ListboxController extends utils.RootSingleList implements ng.IController, 
                     let that1 = this;
                     this.list.obj.on("changeData", function () {
                         that1.collectionAdapter.calcCollections(that.list.collection);
-                        that1.timeout();
                     });
 
                     let that = this;
